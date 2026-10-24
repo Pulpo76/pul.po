@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoja de Trabajo Contable - Sistema Profesional</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-4 md:p-6">
+
+    <!-- Header / Navbar -->
+    <header class="max-w-7xl mx-auto w-full bg-white/90 backdrop-blur-md rounded-2xl p-4 md:p-6 custom-shadow border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 text-white p-3 rounded-xl shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">Hoja de Trabajo Contable</h1>
+                <p class="text-xs md:text-sm text-slate-500 font-medium">Sistema con Listas Desplegables, Ajustes Sincronizados y Cálculo Final</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap justify-center">
+            <button onclick="addRow()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-sm active:scale-95 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Agregar Fila (+)
+            </button>
+            <button onclick="removeRow()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-sm active:scale-95 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                </svg>
+                Quitar Fila (-)
+            </button>
+            <button onclick="resetWorksheet()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-sm active:scale-95">
+                Reiniciar Todo
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Layout (Dual Panel) -->
+    <main class="max-w-[98%] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow items-start">
+        
+        <!-- LEFT PANEL: Hoja de Trabajo Principal (75% / 9 cols in lg) -->
+        <section class="lg:col-span-9 bg-white rounded-3xl custom-shadow border border-slate-100 p-4 md:p-6 overflow-hidden">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-3 h-3 bg-indigo-600 rounded-full inline-block"></span>
+                    Hoja de Trabajo (<span id="row-count">24</span> filas activas)
+                </h2>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-semibold border border-indigo-100">
+                        Suma Dinámica tras PN
+                    </span>
+                    <button onclick="runFinalCalculation()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-md active:scale-95 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Cálculo Final 🏆
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Table Wrapper -->
+            <div class="overflow-x-auto max-h-[72vh] rounded-2xl border border-slate-200">
+                <table class="w-full text-xs text-left border-collapse min-w-[950px]">
+                    <thead class="bg-slate-900 text-white sticky top-0 z-30 text-center font-semibold">
+                        <tr>
+                            <th rowspan="2" class="p-3 border-r border-slate-700 w-44">CUENTAS</th>
+                            <th rowspan="2" class="p-3 border-r border-slate-700 w-32">CLASIF.</th>
+                            <th colspan="2" class="p-2 border-r border-slate-700 bg-emerald-800">SALDOS</th>
+                            <th colspan="2" class="p-2 border-r border-slate-700 bg-rose-800">AJUSTES</th>
+                            <th colspan="2" class="p-2 border-r border-slate-700 bg-amber-800">SALDOS AJUSTADOS</th>
+                            <th colspan="2" class="p-2 border-r border-slate-700 bg-slate-800">S. PATRIMONIAL</th>
+                            <th colspan="2" class="p-2 bg-slate-800">ESTADO DE RESULTADO</th>
+                        </tr>
+                        <tr>
+                            <!-- Saldos -->
+                            <th class="p-2 border-r border-slate-700 bg-emerald-900 w-20">SSDD</th>
+                            <th class="p-2 border-r border-slate-700 bg-emerald-900 w-20">SSAA</th>
+                            <!-- Ajustes -->
+                            <th class="p-2 border-r border-slate-700 bg-rose-900 w-20">D</th>
+                            <th class="p-2 border-r border-slate-700 bg-rose-900 w-20">H</th>
+                            <!-- Saldos Ajustados -->
+                            <th class="p-2 border-r border-slate-700 bg-amber-900 w-20">SD</th>
+                            <th class="p-2 border-r border-slate-700 bg-amber-900 w-20">SA</th>
+                            <!-- S. Patrimonial -->
+                            <th class="p-2 border-r border-slate-700 bg-slate-900 w-24">ACTIVO</th>
+                            <th class="p-2 border-r border-slate-700 bg-slate-900 w-24">PASIVO + PN</th>
+                            <!-- Estado de Resultado -->
+                            <th class="p-2 border-r border-slate-700 bg-slate-900 w-24">PÉRDIDA</th>
+                            <th class="p-2 bg-slate-900 w-24">GANANCIA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="worksheet-tbody" class="divide-y divide-slate-200">
+                        <!-- Generado dinámicamente -->
+                    </tbody>
+                    <tfoot class="bg-slate-900 text-white sticky bottom-0 z-30 font-bold text-center">
+                        <tr id="worksheet-final-totals">
+                            <!-- Totales Finales -->
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: Asientos de Ajuste (25% / 3 cols in lg) -->
+        <section class="lg:col-span-3 bg-white rounded-3xl custom-shadow border border-slate-100 p-4 md:p-6 flex flex-col h-full">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-3 h-3 bg-rose-600 rounded-full inline-block"></span>
+                    Asientos de Ajuste
+                </h2>
+                <div class="flex gap-1">
+                    <button onclick="addAdjustmentRow()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-2 py-1.5 rounded-xl border border-rose-200 transition-all">+</button>
+                    <button onclick="removeAdjustmentRow()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-2 py-1.5 rounded-xl border border-rose-200 transition-all">-</button>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 mb-3 font-medium leading-relaxed">
+                Ingresa los ajustes. Presiona <b>Aplicar Ajustes</b> para sincronizar con la hoja de trabajo.
+            </p>
+
+            <!-- Scrollable Adjustments Table -->
+            <div class="overflow-y-auto max-h-[50vh] rounded-2xl border border-slate-200 mb-4 flex-grow">
+                <table class="w-full text-xs text-left border-collapse">
+                    <thead class="bg-rose-900 text-white sticky top-0 z-10 text-center font-semibold">
+                        <tr>
+                            <th class="p-2 border-r border-rose-800 w-12">E</th>
+                            <th class="p-2 border-r border-rose-800">DETALLES</th>
+                            <th class="p-2 border-r border-rose-800 w-14">D</th>
+                            <th class="p-2 w-14">H</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adjustments-tbody" class="divide-y divide-slate-100">
+                        <!-- Generado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <button onclick="applyAdjustments()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Aplicar Ajustes
+            </button>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs">
+                <div class="flex justify-between font-bold mb-1">
+                    <span class="text-slate-600">Total Ajustes D:</span>
+                    <span id="total-adj-d" class="text-rose-600 font-mono">0</span>
+                </div>
+                <div class="flex justify-between font-bold">
+                    <span class="text-slate-600">Total Ajustes H:</span>
+                    <span id="total-adj-h" class="text-rose-600 font-mono">0</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Celebration Modal (Hidden by Default) -->
+    <div id="celebration-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center custom-shadow border border-slate-100 animate-bounce-slow">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
+                🏆
+            </div>
+            <h2 class="text-3xl font-black text-slate-900 mb-2">¡GENIOOOO! 🎉</h2>
+            <p id="celebration-message" class="text-slate-600 text-sm mb-6 font-medium">
+                ¡Los cálculos de Activo vs Pasivo+PN y Pérdida vs Ganancia coinciden perfectamente! Has completado la hoja de trabajo como un experto.
+            </p>
+            <button onclick="closeCelebration()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition-all active:scale-95">
+                ¡Excelente! Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-400 mt-6">
+        Hoja de Trabajo Contable Pro • Con Listas Desplegables, Ajustes y Celebración Genio
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let mainRows = [];
+        let adjustmentRows = [];
+
+        const classificationOptions = [
+            { value: '', label: '-- Seleccionar --' },
+            { value: 'A', label: 'A (Activo)' },
+            { value: 'P', label: 'P (Pasivo)' },
+            { value: 'R-', label: 'R- (Pérdida)' },
+            { value: 'R+', label: 'R+ (Ganancia)' },
+            { value: 'PN', label: 'PN (Patrimonio Neto)' },
+            { value: 'reg(A)', label: 'reg(A) (Reg. Activo)' },
+            { value: 'reg(P)', label: 'reg(P) (Reg. Pasivo)' },
+            { value: 'reg(r-)', label: 'reg(r-) (Reg. Pérdida)' },
+            { value: 'reg(r+)', label: 'reg(r+) (Reg. Ganancia)' }
+        ];
+
+        function initApp() {
+            mainRows = [];
+            for (let i = 1; i <= 24; i++) {
+                mainRows.push({ id: i, name: '', classification: '', ssdd: '', ssaa: '', adjD: 0, adjH: 0 });
+            }
+
+            adjustmentRows = [
+                { id: 1, type: '', name: '', d: '', h: '' },
+                { id: 2, type: '', name: '', d: '', h: '' },
+                { id: 3, type: '', name: '', d: '', h: '' }
+            ];
+
+            renderFullApp();
+        }
+
+        function addRow() {
+            const newId = mainRows.length > 0 ? Math.max(...mainRows.map(r => r.id)) + 1 : 1;
+            mainRows.push({ id: newId, name: '', classification: '', ssdd: '', ssaa: '', adjD: 0, adjH: 0 });
+            renderFullApp();
+        }
+
+        function removeRow() {
+            if (mainRows.length > 1) {
+                mainRows.pop();
+                renderFullApp();
+            }
+        }
+
+        function addAdjustmentRow() {
+            const newId = adjustmentRows.length > 0 ? Math.max(...adjustmentRows.map(r => r.id)) + 1 : 1;
+            adjustmentRows.push({ id: newId, type: '', name: '', d: '', h: '' });
+            renderAdjTable();
+        }
+
+        function removeAdjustmentRow() {
+            if (adjustmentRows.length > 1) {
+                adjustmentRows.pop();
+                renderAdjTable();
+            }
+        }
+
+        function resetWorksheet() {
+            initApp();
+        }
+
+        // Render Adjustments Table
+        function renderAdjTable() {
+            const tbody = document.getElementById('adjustments-tbody');
+            tbody.innerHTML = '';
+            adjustmentRows.forEach(adj => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-1 border-r border-slate-100">
+                        <input type="text" value="${adj.type}" data-id="${adj.id}" data-field="type" oninput="updateAdjData(this)" class="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 text-center font-bold uppercase text-xs">
+                    </td>
+                    <td class="p-1 border-r border-slate-100">
+                        <input type="text" value="${adj.name}" data-id="${adj.id}" data-field="name" oninput="updateAdjData(this)" placeholder="Cuenta..." class="w-full bg-slate-50 border border-slate-200 rounded px-1 py-1 uppercase text-xs">
+                    </td>
+                    <td class="p-1 border-r border-slate-100">
+                        <input type="number" value="${adj.d}" data-id="${adj.id}" data-field="d" oninput="updateAdjData(this)" placeholder="0" class="w-full bg-rose-50/50 border border-rose-200 rounded px-1 py-1 text-right text-xs">
+                    </td>
+                    <td class="p-1">
+                        <input type="number" value="${adj.h}" data-id="${adj.id}" data-field="h" oninput="updateAdjData(this)" placeholder="0" class="w-full bg-rose-50/50 border border-rose-200 rounded px-1 py-1 text-right text-xs">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateAdjTotals();
+        }
+
+        function updateAdjData(el) {
+            const id = parseInt(el.dataset.id);
+            const field = el.dataset.field;
+            const row = adjustmentRows.find(r => r.id === id);
+            if (row) {
+                row[field] = el.value;
+                updateAdjTotals();
+            }
+        }
+
+        function updateAdjTotals() {
+            let totalD = 0, totalH = 0;
+            adjustmentRows.forEach(adj => {
+                totalD += parseFloat(adj.d) || 0;
+                totalH += parseFloat(adj.h) || 0;
+            });
+            document.getElementById('total-adj-d').innerText = totalD.toLocaleString('es-AR');
+            document.getElementById('total-adj-h').innerText = totalH.toLocaleString('es-AR');
+        }
+
+        // Apply Adjustments Button Clicked
+        function applyAdjustments() {
+            mainRows.forEach(r => { r.adjD = 0; r.adjH = 0; });
+
+            adjustmentRows.forEach(adj => {
+                const name = (adj.name || '').trim().toUpperCase();
+                const d = parseFloat(adj.d) || 0;
+                const h = parseFloat(adj.h) || 0;
+                if (!name || (d === 0 && h === 0)) return;
+
+                let existingRow = mainRows.find(r => (r.name || '').trim().toUpperCase() === name);
+                if (existingRow) {
+                    existingRow.adjD += d;
+                    existingRow.adjH += h;
+                } else {
+                    const newId = mainRows.length > 0 ? Math.max(...mainRows.map(r => r.id)) + 1 : 1;
+                    mainRows.push({ id: newId, name: name, classification: '', ssdd: '', ssaa: '', adjD: d, adjH: h });
+                }
+            });
+
+            renderFullApp();
+        }
+
+        // Main Data Update without losing focus
+        function updateMainData(el) {
+            const id = parseInt(el.dataset.id);
+            const field = el.dataset.field;
+            const row = mainRows.find(r => r.id === id);
+            if (row) {
+                row[field] = el.value;
+                if (field === 'classification') {
+                    renderFullApp();
+                } else {
+                    updateCalculationsOnly();
+                }
+            }
+        }
+
+        // Core Calculation Engine per Row
+        function computeRowValues(row) {
+            const ssdd = parseFloat(row.ssdd) || 0;
+            const ssaa = parseFloat(row.ssaa) || 0;
+            const adjD = row.adjD || 0;
+            const adjH = row.adjH || 0;
+            const cls = (row.classification || '').trim().toLowerCase();
+
+            let sd = 0, sa = 0;
+            let isDebitNature = ['a', 'r-', 'reg(p)', 'reg(r-)'].includes(cls);
+            let isCreditNature = ['p', 'pn', 'r+', 'reg(a)', 'reg(r+)'].includes(cls);
+            if (!isDebitNature && !isCreditNature) isDebitNature = true;
+
+            if (isDebitNature) {
+                let val = (ssdd - ssaa) + (adjD - adjH);
+                if (val >= 0) { sd = val; sa = 0; }
+                else { sd = 0; sa = -val; }
+            } else {
+                let val = (ssaa - ssdd) + (adjH - adjD);
+                if (val >= 0) { sa = val; sd = 0; }
+                else { sa = 0; sd = -val; }
+            }
+
+            let activoVal = 0, pasivoPnVal = 0, perdidaVal = 0, gananciaVal = 0;
+
+            if (cls === 'a') {
+                if (sd > 0) activoVal = sd; else if (sa > 0) activoVal = -sa;
+            } else if (cls === 'p' || cls === 'pn') {
+                if (sa > 0) pasivoPnVal = sa; else if (sd > 0) pasivoPnVal = -sd;
+            } else if (cls === 'r-') {
+                if (sd > 0) perdidaVal = sd; else if (sa > 0) perdidaVal = -sa;
+            } else if (cls === 'r+') {
+                if (sa > 0) gananciaVal = sa; else if (sd > 0) gananciaVal = -sd;
+            } else if (cls === 'reg(a)') {
+                if (sa > 0) activoVal = -sa; else if (sd > 0) activoVal = sd;
+            } else if (cls === 'reg(p)') {
+                if (sd > 0) pasivoPnVal = -sd; else if (sa > 0) pasivoPnVal = sa;
+            } else if (cls === 'reg(r-)') {
+                if (sa > 0) perdidaVal = -sa; else if (sd > 0) perdidaVal = sd;
+            } else if (cls === 'reg(r+)') {
+                if (sd > 0) gananciaVal = -sd; else if (sa > 0) gananciaVal = sa;
+            } else {
+                if (sd > 0) activoVal = sd;
+            }
+
+            return { adjD, adjH, sd, sa, activoVal, pasivoPnVal, perdidaVal, gananciaVal, ssdd, ssaa };
+        }
+
+        // Full Render of Worksheet
+        function renderFullApp() {
+            renderAdjTable();
+            const tbody = document.getElementById('worksheet-tbody');
+            tbody.innerHTML = '';
+
+            let pnIndex = mainRows.findIndex(r => (r.classification || '').trim().toUpperCase() === 'PN');
+            if (pnIndex === -1) pnIndex = mainRows.length - 1;
+
+            let sumSsdd = 0, sumSsaa = 0;
+
+            mainRows.forEach((row, index) => {
+                if (index === pnIndex + 1) {
+                    const sumTr = document.createElement('tr');
+                    sumTr.className = "bg-indigo-950 text-white font-bold text-center";
+                    sumTr.innerHTML = `
+                        <td colspan="2" class="p-3 text-right uppercase tracking-wider text-xs">SUMAS IGUALES (Bloque Inicial):</td>
+                        <td class="p-2 border-r border-indigo-800 text-right font-mono text-xs text-emerald-300" id="sum-ssdd">${sumSsdd.toLocaleString('es-AR')}</td>
+                        <td class="p-2 border-r border-indigo-800 text-right font-mono text-xs text-emerald-300" id="sum-ssaa">${sumSsaa.toLocaleString('es-AR')}</td>
+                        <td colspan="8" class="p-2 bg-indigo-900 text-center text-xs text-indigo-200">Saldos iniciales equilibrados hasta Patrimonio Neto</td>
+                    `;
+                    tbody.appendChild(sumTr);
+                }
+
+                if (index <= pnIndex) {
+                    sumSsdd += parseFloat(row.ssdd) || 0;
+                    sumSsaa += parseFloat(row.ssaa) || 0;
+                }
+
+                appendWorksheetRow(tbody, row);
+            });
+
+            if (pnIndex === mainRows.length - 1) {
+                const sumTr = document.createElement('tr');
+                sumTr.className = "bg-indigo-950 text-white font-bold text-center";
+                sumTr.innerHTML = `
+                    <td colspan="2" class="p-3 text-right uppercase tracking-wider text-xs">SUMAS IGUALES (Bloque Inicial):</td>
+                    <td class="p-2 border-r border-indigo-800 text-right font-mono text-xs text-emerald-300" id="sum-ssdd">${sumSsdd.toLocaleString('es-AR')}</td>
+                    <td class="p-2 border-r border-indigo-800 text-right font-mono text-xs text-emerald-300" id="sum-ssaa">${sumSsaa.toLocaleString('es-AR')}</td>
+                    <td colspan="8" class="p-2 bg-indigo-900 text-center text-xs text-indigo-200">Saldos iniciales equilibrados hasta Patrimonio Neto</td>
+                `;
+                tbody.appendChild(sumTr);
+            }
+
+            document.getElementById('row-count').innerText = mainRows.length;
+            updateCalculationsOnly();
+        }
+
+        function appendWorksheetRow(tbody, row) {
+            const res = computeRowValues(row);
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100";
+            tr.setAttribute('data-row-id', row.id);
+
+            // Build options for select
+            let optionsHtml = '';
+            classificationOptions.forEach(opt => {
+                const selected = row.classification === opt.value ? 'selected' : '';
+                optionsHtml += `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
+            });
+
+            tr.innerHTML = `
+                <td class="p-2 border-r border-slate-200">
+                    <input type="text" value="${row.name}" data-id="${row.id}" data-field="name" oninput="updateMainData(this)" placeholder="Nombre cuenta..." class="w-full bg-transparent border-0 focus:ring-1 focus:ring-indigo-500 rounded px-1 uppercase font-semibold text-slate-800 text-xs">
+                </td>
+                <td class="p-2 border-r border-slate-200 text-center">
+                    <select data-id="${row.id}" data-field="classification" onchange="updateMainData(this)" class="w-full bg-slate-50 border border-slate-200 rounded text-center px-1 py-1 uppercase font-bold text-indigo-700 text-xs focus:ring-2 focus:ring-indigo-500">
+                        ${optionsHtml}
+                    </select>
+                </td>
+                <!-- Saldos -->
+                <td class="p-2 border-r border-slate-200 bg-emerald-50/40">
+                    <input type="number" value="${row.ssdd}" data-id="${row.id}" data-field="ssdd" oninput="updateMainData(this)" placeholder="" class="w-full bg-transparent border-0 text-right font-mono text-xs text-emerald-900">
+                </td>
+                <td class="p-2 border-r border-slate-200 bg-emerald-50/40">
+                    <input type="number" value="${row.ssaa}" data-id="${row.id}" data-field="ssaa" oninput="updateMainData(this)" placeholder="" class="w-full bg-transparent border-0 text-right font-mono text-xs text-emerald-900">
+                </td>
+                <!-- Ajustes -->
+                <td class="p-2 border-r border-slate-200 bg-rose-50/40 text-right font-mono text-xs text-rose-900 font-bold cell-adj-d">${res.adjD ? res.adjD.toLocaleString('es-AR') : ''}</td>
+                <td class="p-2 border-r border-slate-200 bg-rose-50/40 text-right font-mono text-xs text-rose-900 font-bold cell-adj-h">${res.adjH ? res.adjH.toLocaleString('es-AR') : ''}</td>
+                <!-- Saldos Ajustados -->
+                <td class="p-2 border-r border-slate-200 bg-amber-50/40 text-right font-mono text-xs text-amber-900 font-bold cell-sd">${res.sd ? res.sd.toLocaleString('es-AR') : ''}</td>
+                <td class="p-2 border-r border-slate-200 bg-amber-50/40 text-right font-mono text-xs text-amber-900 font-bold cell-sa">${res.sa ? res.sa.toLocaleString('es-AR') : ''}</td>
+                <!-- S. Patrimonial -->
+                <td class="p-2 border-r border-slate-200 bg-slate-50 text-right font-mono text-xs ${res.activoVal < 0 ? 'text-rose-600 font-bold' : 'text-slate-700'} cell-activo">${res.activoVal ? res.activoVal.toLocaleString('es-AR') : ''}</td>
+                <td class="p-2 border-r border-slate-200 bg-slate-50 text-right font-mono text-xs ${res.pasivoPnVal < 0 ? 'text-rose-600 font-bold' : 'text-slate-700'} cell-pasivopn">${res.pasivoPnVal ? res.pasivoPnVal.toLocaleString('es-AR') : ''}</td>
+                <!-- Estado de Resultado -->
+                <td class="p-2 border-r border-slate-200 bg-slate-50 text-right font-mono text-xs ${res.perdidaVal < 0 ? 'text-rose-600 font-bold' : 'text-slate-700'} cell-perdida">${res.perdidaVal ? res.perdidaVal.toLocaleString('es-AR') : ''}</td>
+                <td class="p-2 bg-slate-50 text-right font-mono text-xs ${res.gananciaVal < 0 ? 'text-rose-600 font-bold' : 'text-slate-700'} cell-ganancia">${res.gananciaVal ? res.gananciaVal.toLocaleString('es-AR') : ''}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function updateCalculationsOnly() {
+            let sumSsdd = 0, sumSsaa = 0;
+            let tAdjD = 0, tAdjH = 0, tSd = 0, tSa = 0, tActivo = 0, tPasivoPn = 0, tPerdida = 0, tGanancia = 0;
+
+            let pnIndex = mainRows.findIndex(r => (r.classification || '').trim().toUpperCase() === 'PN');
+            if (pnIndex === -1) pnIndex = mainRows.length - 1;
+
+            mainRows.forEach((row, index) => {
+                const res = computeRowValues(row);
+                if (index <= pnIndex) {
+                    sumSsdd += res.ssdd;
+                    sumSsaa += res.ssaa;
+                }
+                tAdjD += res.adjD;
+                tAdjH += res.adjH;
+                tSd += res.sd;
+                tSa += res.sa;
+                tActivo += res.activoVal;
+                tPasivoPn += res.pasivoPnVal;
+                tPerdida += res.perdidaVal;
+                tGanancia += res.gananciaVal;
+
+                const tr = document.querySelector(`tr[data-row-id="${row.id}"]`);
+                if (tr) {
+                    tr.querySelector('.cell-adj-d').innerText = res.adjD ? res.adjD.toLocaleString('es-AR') : '';
+                    tr.querySelector('.cell-adj-h').innerText = res.adjH ? res.adjH.toLocaleString('es-AR') : '';
+                    tr.querySelector('.cell-sd').innerText = res.sd ? res.sd.toLocaleString('es-AR') : '';
+                    tr.querySelector('.cell-sa').innerText = res.sa ? res.sa.toLocaleString('es-AR') : '';
+                    tr.querySelector('.cell-activo').innerText = res.activoVal ? res.activoVal.toLocaleString('es-AR') : '';
+                    tr.querySelector('.cell-pasivopn').innerText = res.pasivoPnVal ? res.pasivoPnVal.toLocaleString('es-AR') : '';
+                    tr.querySelector('.cell-perdida').innerText = res.perdidaVal ? res.perdidaVal.toLocaleString('es-AR') : '';
+                    tr.querySelector('.cell-ganancia').innerText = res.gananciaVal ? res.gananciaVal.toLocaleString('es-AR') : '';
+                }
+            });
+
+            const sumSsddEl = document.getElementById('sum-ssdd');
+            if (sumSsddEl) sumSsddEl.innerText = sumSsdd.toLocaleString('es-AR');
+            const sumSsaaEl = document.getElementById('sum-ssaa');
+            if (sumSsaaEl) sumSsaaEl.innerText = sumSsaa.toLocaleString('es-AR');
+
+            const finalTr = document.getElementById('worksheet-final-totals');
+            if (finalTr) {
+                finalTr.innerHTML = `
+                    <td colspan="2" class="p-3 text-right uppercase tracking-wider text-xs font-black">TOTALES FINALES:</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-emerald-300">-</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-emerald-300">-</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-rose-300">${tAdjD.toLocaleString('es-AR')}</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-rose-300">${tAdjH.toLocaleString('es-AR')}</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-amber-300">${tSd.toLocaleString('es-AR')}</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-amber-300">${tSa.toLocaleString('es-AR')}</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-slate-200">${tActivo.toLocaleString('es-AR')}</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-slate-200">${tPasivoPn.toLocaleString('es-AR')}</td>
+                    <td class="p-2 border-r border-slate-700 text-right font-mono text-xs text-slate-200">${tPerdida.toLocaleString('es-AR')}</td>
+                    <td class="p-2 text-right font-mono text-xs text-slate-200">${tGanancia.toLocaleString('es-AR')}</td>
+                `;
+            }
+        }
+
+        // Web Audio API Victory Melody
+        function playVictorySound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.15);
+                    
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.15 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(ctx.currentTime + idx * 0.15);
+                    osc.stop(ctx.currentTime + idx * 0.15 + 0.3);
+                });
+            } catch (e) {
+                console.log("Audio not supported or blocked", e);
+            }
+        }
+
+        // Final Calculation & Check
+        function runFinalCalculation() {
+            let tActivo = 0, tPasivoPn = 0, tPerdida = 0, tGanancia = 0;
+            mainRows.forEach(row => {
+                const res = computeRowValues(row);
+                tActivo += res.activoVal;
+                tPasivoPn += res.pasivoPnVal;
+                tPerdida += res.perdidaVal;
+                tGanancia += res.gananciaVal;
+            });
+
+            // Differences
+            let diffPatrimonial = Math.abs(tActivo - tPasivoPn);
+            let diffResultado = Math.abs(tGanancia - tPerdida);
+
+            // Check if balanced (allowing tiny float tolerance)
+            const isBalanced = Math.abs(diffPatrimonial - diffResultado) < 1 && (tActivo > 0 || tPasivoPn > 0);
+
+            if (isBalanced) {
+                playVictorySound();
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+                document.getElementById('celebration-message').innerHTML = `
+                    ¡Los cálculos coinciden con éxito!<br><br>
+                    <b>Diferencia Activo / Pasivo+PN:</b> ${diffPatrimonial.toLocaleString('es-AR')}<br>
+                    <b>Diferencia Pérdida / Ganancia:</b> ${diffResultado.toLocaleString('es-AR')}
+                `;
+                document.getElementById('celebration-modal').classList.remove('hidden');
+            } else {
+                alert(`Revisa los datos: La diferencia patrimonial (${diffPatrimonial.toLocaleString('es-AR')}) no coincide con la diferencia de resultados (${diffResultado.toLocaleString('es-AR')}).`);
+            }
+        }
+
+        function closeCelebration() {
+            document.getElementById('celebration-modal').classList.add('hidden');
+        }
+
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
