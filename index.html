@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>pul.po | Aula Lab</title>
+<style>
+:root {
+  --bg: #0b1120;
+  --panel: #151e30;
+  --border: #29364b;
+  --text: #f1f5f9;
+  --muted: #a3b1c6;
+  --accent: #38bdf8;
+}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, Arial, sans-serif;
+}
+button, input { font: inherit; }
+header {
+  border-bottom: 1px solid var(--border);
+  background: #101827;
+  padding: 18px 6%;
+}
+.nav {
+  max-width: 1150px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 21px;
+  font-weight: 850;
+  letter-spacing: 1px;
+}
+.logo {
+  background: var(--accent);
+  color: #082032;
+  padding: 10px;
+  border-radius: 12px;
+}
+.nav small { color: var(--muted); }
+main {
+  width: 90%;
+  max-width: 1150px;
+  margin: 35px auto 70px;
+}
+.hero {
+  padding: clamp(25px, 5vw, 55px);
+  border: 1px solid var(--border);
+  border-radius: 25px;
+  background:
+    radial-gradient(ellipse at 90% 0%, #164e6355, transparent 45%),
+    linear-gradient(135deg, #172338, #111827);
+}
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+h1 {
+  font-size: clamp(35px, 6vw, 62px);
+  line-height: 1.05;
+  margin: 15px 0;
+  letter-spacing: -2px;
+}
+.hero p {
+  max-width: 570px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.search {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+  max-width: 650px;
+}
+.search input {
+  width: 100%;
+  min-width: 0;
+  padding: 15px;
+  color: white;
+  background: #0b1120;
+  border: 1px solid #40506a;
+  border-radius: 12px;
+  outline-color: var(--accent);
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 35px 0 17px;
+}
+h2 { font-size: 22px; margin: 0; }
+.counter { color: var(--muted); font-size: 13px; }
+.categories {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+/* BOTONES OCULTOS POR DEFECTO */
+.category {
+  background: var(--panel);
+  color: #dbeafe;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  display: none; 
+}
+.category:hover, .category.active {
+  background: #075985;
+  border-color: #38bdf8;
+  color: white;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 17px;
+}
+.card {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  transition: transform .2s, border-color .2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: #38bdf8;
+}
+.cover {
+  min-height: 130px;
+  display: grid;
+  place-items: center;
+  font-size: 52px;
+}
+.blue { background: linear-gradient(135deg,#164e63,#0e7490); }
+.purple { background: linear-gradient(135deg,#3b276d,#6d28d9); }
+.orange { background: linear-gradient(135deg,#78350f,#c2410c); }
+.green { background: linear-gradient(135deg,#14532d,#15803d); }
+.pink { background: linear-gradient(135deg,#831843,#be185d); }
+.card-body { padding: 18px; }
+.tag {
+  color: #7dd3fc;
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+.card h3 { font-size: 18px; margin: 9px 0; }
+.card p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 42px;
+}
+.play {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  color: #071521;
+  background: var(--accent);
+  padding: 11px;
+  margin-top: 15px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+.play:hover { background: #7dd3fc; }
+.empty {
+  display: none;
+  padding: 35px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 15px;
+}
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 25px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+@media(max-width:800px) {
+  .grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:480px) {
+  header { padding: 14px 5%; }
+  .nav small { display: none; }
+  main { width: 92%; margin-top: 20px; }
+  .grid { grid-template-columns: 1fr; }
+  .cover { min-height: 110px; }
+  .section-head { align-items: flex-start; flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<audio id="bg-music" loop src="./music-control.mp3"></audio>
+
+<header>
+  <div class="nav">
+    <div class="brand">
+      <span class="logo">🎓</span>
+      <span>AULA LAB</span>
+    </div>
+    <small>COMERCIO INTERNACIONAL · REPOSITORIO pul.po</small>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">TU BIBLIOTECA ACADÉMICA</div>
+    <h1>Aprender<br>jugando.</h1>
+    <p>
+      Explorá exámenes y prácticos organizados por carpeta. 
+      Las materias se mostrarán automáticamente cuando agregues contenido.
+    </p>
+    <div class="search">
+      <input id="search" type="search" placeholder="🔎 Buscar exámenes o materias..." aria-label="Buscar">
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Materias</h2>
+    </div>
+    <div class="categories" id="categories">
+      <!-- BOTONES DE TODAS TUS MATERIAS -->
+      <button class="category active" data-category="Todos" id="btn-todos">Todos</button>
+      <button class="category" data-category="Contabilidad General">📊 Contabilidad General</button>
+      <button class="category" data-category="Ingles">🇬🇧 Inglés</button>
+      <button class="category" data-category="Instituciones del Derecho Privado">⚖️ Instituciones del Derecho Privado</button>
+      <button class="category" data-category="Estadística">📈 Estadística</button>
+      <button class="category" data-category="Administración General">🏛️ Administración General</button>
+      <button class="category" data-category="Sistema Bancario y Financiero en el Comercio Internacional">💳 Sistema Bancario y Financiero</button>
+      <button class="category" data-category="Portugués">🇧🇷 Portugués</button>
+      <button class="category" data-category="Marketing">🎯 Marketing</button>
+      <button class="category" data-category="Sistemas humanos">👥 Sistemas humanos</button>
+      <button class="category" data-category="Celulas">🧬 Células</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Exámenes y Trabajos</h2>
+      <span class="counter" id="counter"></span>
+    </div>
+
+    <div class="grid" id="games">
+        <!-- Las tarjetas se generan aquí -->
+    </div>
+
+    <div class="empty" id="empty">
+      No encontramos archivos con esa búsqueda.
+    </div>
+  </section>
+</main>
+
+<footer>
+  Aula Lab · Universidad Nacional de Luján
+</footer>
+
+<script>
+// =========================================================================
+// 1. TU LISTA DE EXÁMENES (AGREGA LOS TUYOS AQUÍ)
+// =========================================================================
+const misExamenes = [
+  { carpeta: "Celulas", archivo: "biologia_examen.html", titulo: "Examen de Biología", cover: "blue", emoji: "🧬" },
+  { carpeta: "Instituciones del Derecho Privado", archivo: "Responsabilidad.html", titulo: "Examen de Responsabilidades de las partes", cover: "blue", emoji: "⚖️" },
+  { carpeta: "Sistema Bancario y Financiero en el Comercio Internacional", archivo: "LetraCambio.html", titulo: "Letra de Cambio", cover: "blue", emoji: "🏦" },
+  { carpeta: "Sistema Bancario y Financiero en el Comercio Internacional", archivo: "ExamenC.html", titulo: "Examen circuito Diferido", cover: "blue", emoji: "🏦" },
+  { carpeta: "Sistema Bancario y Financiero en el Comercio Internacional", archivo: "orden.html", titulo: "Orden de pago diferido", cover: "blue", emoji: "🏦" },
+  { carpeta: "Sistema Bancario y Financiero en el Comercio Internacional", archivo: "CircuitoLC.html", titulo: "Circuito operativo de una LC", cover: "blue", emoji: "🏦" },
+  { carpeta: "Sistema Bancario y Financiero en el Comercio Internacional", archivo: "LC.html", titulo: "Examen de circuito Credito ", cover: "green", emoji: "🏦" },
+  { carpeta: "Ingles", archivo: "ingles_tp.html", titulo: "Práctica de Inglés", cover: "orange", emoji: "🇬🇧" }
+];
+
+// LÓGICA PARA CREAR TARJETAS Y OCULTAR CATEGORÍAS VACÍAS
+function cargarTarjetas() {
+  const grid = document.getElementById("games");
+  grid.innerHTML = "";
+  let categoriasActivas = new Set();
+
+  if (misExamenes.length === 0) {
+    grid.innerHTML = '<div style="color: var(--muted); grid-column: span 3; text-align: center;">Aún no hay exámenes agregados en el código.</div>';
+    document.getElementById("btn-todos").style.display = "none";
+    return;
+  }
+
+  document.getElementById("btn-todos").style.display = "inline-block";
+
+  // Crear tarjeta por cada examen
+  misExamenes.forEach(item => {
+    categoriasActivas.add(item.carpeta);
+    const card = document.createElement("article");
+    card.className = "card";
+    card.dataset.category = item.carpeta;
+    card.dataset.search = (item.titulo + " " + item.carpeta).toLowerCase();
+
+    // AQUÍ SE CONSTRUYE LA RUTA: carpeta/archivo.html
+    const rutaExamen = `${item.carpeta}/${item.archivo}`;
+
+    card.innerHTML = `
+      <div class="cover ${item.cover}">${item.emoji}</div>
+      <div class="card-body">
+        <span class="tag">${item.carpeta}</span>
+        <h3>${item.titulo}</h3>
+        <p>Evaluación interactiva de ${item.carpeta}.</p>
+        <a class="play" href="${rutaExamen}">Acceder al examen →</a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Mostrar SOLO los botones de las carpetas que tienen exámenes
+  document.querySelectorAll(".category").forEach(btn => {
+    const cat = btn.dataset.category;
+    if (cat === "Todos" || categoriasActivas.has(cat)) {
+      btn.style.display = "inline-block";
+    } else {
+      btn.style.display = "none";
+    }
+  });
+
+  cards = [...document.querySelectorAll(".card")];
+  filterExams();
+}
+
+// LÓGICA DE BÚSQUEDA Y FILTROS
+const search = document.getElementById("search");
+const buttons = [...document.querySelectorAll(".category")];
+const counter = document.getElementById("counter");
+const empty = document.getElementById("empty");
+let selected = "Todos";
+let cards = [];
+
+function filterExams() {
+  const query = search.value.trim().toLowerCase();
+  let visible = 0;
+
+  cards.forEach(card => {
+    const text = (card.innerText + " " + card.dataset.search).toLowerCase();
+    const matchesCategory = selected === "Todos" || card.dataset.category === selected;
+    const matchesSearch = text.includes(query);
+    const show = matchesCategory && matchesSearch;
+
+    card.style.display = show ? "" : "none";
+    if (show) visible++;
+  });
+
+  counter.textContent = visible + (visible === 1 ? " examen" : " exámenes");
+  empty.style.display = visible === 0 ? "block" : "none";
+}
+
+buttons.forEach(button => {
+  button.addEventListener("click", () => {
+    selected = button.dataset.category;
+    buttons.forEach(b => b.classList.toggle("active", b === button));
+    filterExams();
+  });
+});
+
+search.addEventListener("input", filterExams);
+
+// Iniciar
+cargarTarjetas();
+</script>
+
+<script>
+const music = document.getElementById("bg-music");
+music.volume = 0.25;
+document.addEventListener("click", function iniciarMusica() {
+  music.play().catch(() => {});
+  document.removeEventListener("click", iniciarMusica);
+});
+</script>
+
+</body>
+</html>
