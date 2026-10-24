@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circuito Carta de Crédito Interactivo</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#f2f4f5;color:#263238;min-height:100vh}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(360px,1fr);gap:18px;padding:18px;align-items:start}
+.graficos{min-width:0;display:flex;flex-direction:column;gap:18px}.guia{background:#fff;border-radius:8px;padding:22px;box-shadow:0 2px 8px #00000012;min-width:0}
+h2,h3{text-align:center;color:#2c3e50;margin:0 0 16px}h2{font-size:23px}h3{font-size:18px}
+.paso-item{padding:10px 12px;margin-bottom:9px;border:1px solid #e0e5e8;border-radius:6px;line-height:1.5;font-size:14px;background:#fff}
+.etiqueta{font-weight:bold;color:#c94f00;background:#fff0d9;padding:2px 5px;border:1px solid #ffc46d;border-radius:4px;text-transform:uppercase}
+.panel{background:white;border-radius:8px;padding:14px;box-shadow:0 2px 8px #00000012;min-width:0}.diagrama{position:relative;width:100%;aspect-ratio:800/380;border:1px solid #e2e2e2;border-radius:7px;background:#fff;overflow:hidden}
+.diagrama svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.caja-editable{position:absolute;width:17.5%;height:10.53%;border:2px solid #333;background:#fff;color:#111;font-weight:bold;text-align:center;font-size:clamp(10px,1vw,14px);padding:2px;outline:none;z-index:2}
+.caja-editable:focus{border-color:#777;background:#fafafa}
+#caja-exportador{left:5%;top:10.53%}#caja-importador{left:77.5%;top:10.53%}#caja-corresponsal{left:5%;top:73.68%}#caja-emisor{left:77.5%;top:73.68%}
+.linea{stroke:#222;stroke-width:1.5;fill:none;marker-end:url(#flecha)}.doble{marker-start:url(#flecha);marker-end:url(#flecha)}.circulo{fill:#fff;stroke:#222;stroke-width:1.4}.numero{font-family:Arial,sans-serif;font-weight:bold;font-size:13px;fill:#222;text-anchor:middle;dominant-baseline:central}
+/* Esquema contractual simple en blanco y negro */
+.contractual{aspect-ratio:800/330;background:#fff}.nodo{position:absolute;z-index:2;border:2px solid #333;background:#fff;color:#111;text-align:center;font-weight:bold;padding:8px 5px;min-width:18%;font-size:clamp(10px,1vw,14px)}
+#nodo-vendedor{left:5%;top:10%}#nodo-comprador{right:5%;top:10%}#nodo-banco{left:40%;bottom:8%;min-width:20%}
+.subtitulo{display:block;font-size:.86em;margin-top:4px;font-weight:normal}
+.rotulo{position:absolute;z-index:3;background:#fff;padding:2px 5px;text-align:center;font-size:clamp(9px,.9vw,12px);font-weight:bold;color:#222;line-height:1.2}
+#texto-cv{left:35%;top:12%;width:30%}#texto-solicitud{right:12%;top:53%;width:25%}#texto-lc{left:12%;top:53%;width:25%}#texto-centro{left:34%;top:53%;width:32%;font-size:clamp(9px,.9vw,12px)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.graficos{order:1}.guia{order:2}.caja-editable,.nodo{font-size:12px}}
+@media(max-width:520px){.layout{padding:8px;gap:10px}.panel,.guia{padding:10px}.paso-item{font-size:13px}.diagrama{aspect-ratio:800/420}.caja-editable{height:12%;font-size:9px}.nodo{padding:5px 3px;font-size:9px}.rotulo{font-size:8px}}
+</style></head><body>
+<div class="layout">
+ <main class="graficos">
+  <section class="panel"><h3>Circuito Operativo (Editable)</h3>
+   <div class="diagrama" id="circuito">
+    <svg viewBox="0 0 800 380" preserveAspectRatio="none" aria-label="Circuito operativo">
+     <defs><marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#222"/></marker></defs>
+     <!-- Líneas horizontales: terminan justo en los bordes de las cajas -->
+     <line class="linea doble" x1="180" y1="55" x2="620" y2="55"/>
+     <line class="linea" x1="180" y1="91" x2="620" y2="91"/>
+     <line class="linea" x1="620" y1="280" x2="180" y2="280"/>
+     <line class="linea" x1="180" y1="310" x2="620" y2="310"/>
+     <line class="linea" x1="620" y1="340" x2="180" y2="340"/>
+     <!-- Líneas verticales: empiezan y terminan en los bordes de las cajas -->
+     <line class="linea" x1="100" y1="80" x2="100" y2="280"/>
+     <line class="linea" x1="130" y1="280" x2="130" y2="80"/>
+     <line class="linea" x1="160" y1="280" x2="160" y2="80"/>
+     <line class="linea" x1="640" y1="80" x2="640" y2="280"/>
+     <line class="linea" x1="670" y1="280" x2="670" y2="80"/>
+     <line class="linea" x1="700" y1="80" x2="700" y2="280"/>
+     <!-- Números dibujados encima de las líneas para que nunca queden atravesados -->
+     <g><circle class="circulo" cx="400" cy="55" r="16"/><text class="numero" x="400" y="55">1</text></g>
+     <g><circle class="circulo" cx="300" cy="91" r="16"/><text class="numero" x="300" y="91">5</text></g>
+     <g><circle class="circulo" cx="640" cy="180" r="16"/><text class="numero" x="640" y="180">2</text></g>
+     <g><circle class="circulo" cx="670" cy="180" r="16"/><text class="numero" x="670" y="180">8</text></g>
+     <g><circle class="circulo" cx="700" cy="180" r="16"/><text class="numero" x="700" y="180">9</text></g>
+     <g><circle class="circulo" cx="400" cy="280" r="16"/><text class="numero" x="400" y="280">3</text></g>
+     <g><circle class="circulo" cx="500" cy="310" r="16"/><text class="numero" x="500" y="310">7</text></g>
+     <g><circle class="circulo" cx="350" cy="340" r="16"/><text class="numero" x="350" y="340">10</text></g>
+     <g><circle class="circulo" cx="100" cy="180" r="16"/><text class="numero" x="100" y="180">6</text></g>
+     <g><circle class="circulo" cx="130" cy="180" r="16"/><text class="numero" x="130" y="180">4</text></g>
+     <g><circle class="circulo" cx="160" cy="180" r="16"/><text class="numero" x="160" y="180">11</text></g>
+    </svg>
+    <input id="caja-exportador" class="caja-editable" value="Exportador" aria-label="Nombre del exportador" oninput="actualizarTexto('var-exportador',this.value,'Exportador')">
+    <input id="caja-importador" class="caja-editable" value="Importador" aria-label="Nombre del importador" oninput="actualizarTexto('var-importador',this.value,'Importador')">
+    <input id="caja-corresponsal" class="caja-editable" value="Banco Corresponsal" aria-label="Nombre del banco corresponsal" oninput="actualizarTexto('var-banco-corr',this.value,'Banco Corresponsal')">
+    <input id="caja-emisor" class="caja-editable" value="Banco Emisor" aria-label="Nombre del banco emisor" oninput="actualizarTexto('var-banco-emisor',this.value,'Banco Emisor')">
+   </div>
+  </section>
+  <section class="panel"><h3>Esquema Contractual de un Crédito Documentario</h3>
+   <div class="diagrama contractual">
+    <svg viewBox="0 0 800 330" preserveAspectRatio="none" aria-label="Esquema contractual">
+     <defs><marker id="flechaContrato" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#222"/></marker></defs>
+     <line x1="180" y1="62" x2="620" y2="62" stroke="#222" stroke-width="1.7" marker-start="url(#flechaContrato)" marker-end="url(#flechaContrato)"/>
+     <line x1="610" y1="100" x2="485" y2="245" stroke="#222" stroke-width="1.7" marker-start="url(#flechaContrato)" marker-end="url(#flechaContrato)"/>
+     <line x1="315" y1="245" x2="190" y2="100" stroke="#222" stroke-width="1.7" marker-start="url(#flechaContrato)" marker-end="url(#flechaContrato)"/>
+    </svg>
+    <div class="nodo" id="nodo-vendedor">VENDEDOR<span class="subtitulo var-exportador">BENEFICIARIO</span></div>
+    <div class="nodo" id="nodo-comprador">COMPRADOR<span class="subtitulo var-importador">ORDENANTE</span></div>
+    <div class="nodo" id="nodo-banco">BANCO<span class="subtitulo var-banco-emisor">BANCO EMISOR</span></div>
+    <div class="rotulo" id="texto-cv">CONTRATO DE COMPRAVENTA</div>
+    <div class="rotulo" id="texto-solicitud">SOLICITUD DE APERTURA DE L/C<br>(Contrato de mutuo)</div>
+    <div class="rotulo" id="texto-lc">CRÉDITO DOCUMENTARIO<br>(Contrato de pago)</div>
+    <div class="rotulo" id="texto-centro">COMPROMISOS CONTRACTUALES INDEPENDIENTES</div>
+   </div>
+  </section>
+ </main>
+ <aside class="guia"><h2>Guía de Pasos</h2><div class="pasos-lista">
+  <div class="paso-item">Paso 1: cierre del contrato de compraventa internacional entre <span class="etiqueta var-exportador">Exportador</span> e <span class="etiqueta var-importador">Importador</span>.</div>
+  <div class="paso-item">Paso 2: el <span class="etiqueta var-importador">Importador</span> solicita la apertura del crédito documentario al <span class="etiqueta var-banco-emisor">Banco Emisor</span>.</div>
+  <div class="paso-item">Paso 3: envío de la L/C al <span class="etiqueta var-banco-corr">Banco Corresponsal</span>.</div>
+  <div class="paso-item">Paso 4: el <span class="etiqueta var-banco-corr">Banco Corresponsal</span> informa al <span class="etiqueta var-exportador">Exportador</span> de la apertura de la carta de crédito con sus detalles.</div>
+  <div class="paso-item">Paso 5: envío de las mercaderías.</div>
+  <div class="paso-item">Paso 6: Entrega de la documentacion solicitada por el credito documentario, ya sea el <span class="etiqueta var-banco-corr">Banco Corresponsal</span> o el <span class="etiqueta var-banco-emisor">Banco Emisor</span>, <strong>CONTROLARÁN</strong> los documentos entregados por el <span class="etiqueta var-exportador">Exportador</span> o <strong>BENEFICIARIO</strong>.</div>
+  <div class="paso-item">Paso 7: la documentación entregada por el <span class="etiqueta var-exportador">Exportador</span> es enviada al <span class="etiqueta var-banco-emisor">Banco Emisor</span>.</div>
+  <div class="paso-item">Paso 8: el <span class="etiqueta var-banco-emisor">Banco Emisor</span> entrega los documentos de la operación contra firma de un Trust Receipt por parte del <span class="etiqueta var-importador">Importador</span>.</div>
+  <div class="paso-item">Paso 9: el <span class="etiqueta var-importador">Importador</span> paga al vencimiento de la L/C.</div>
+  <div class="paso-item">Paso 10: envío del dinero entre los bancos.</div>
+  <div class="paso-item">Paso 11: cobro de la operación por parte del <span class="etiqueta var-exportador">Exportador</span>.</div>
+ </div></aside>
+</div>
+<script>function actualizarTexto(clase,valor,porDefecto){document.querySelectorAll('.'+clase).forEach(el=>{el.textContent=valor.trim()!==''?valor:porDefecto;});}</script>
+</body></html>
