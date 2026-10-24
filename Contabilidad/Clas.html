@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador de Cuentas Contables</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes flyTo {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(0.5) translateY(-100px); opacity: 0; }
+        }
+        .animate-fly {
+            animation: flyTo 0.35s ease-out forwards;
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-4 md:p-6">
+
+    <!-- Header / Navbar -->
+    <header class="max-w-5xl mx-auto w-full bg-white/80 backdrop-blur-md rounded-2xl p-4 md:p-6 custom-shadow border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 text-white p-3 rounded-xl shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">Auditoría Contable Pro</h1>
+                <p class="text-xs md:text-sm text-slate-500 font-medium">Clasificación Dinámica de Cuentas</p>
+            </div>
+        </div>
+
+        <!-- Estadísticas en vivo -->
+        <div class="flex items-center gap-3 md:gap-6 flex-wrap justify-center">
+            <div class="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center">
+                <span class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Progreso</span>
+                <span id="progress-text" class="text-base font-bold text-slate-700">1 / 22</span>
+            </div>
+            <div class="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200 text-center">
+                <span class="block text-xs font-semibold text-emerald-600 uppercase tracking-wider">Aciertos</span>
+                <span id="score-text" class="text-base font-bold text-emerald-700">0</span>
+            </div>
+            <div class="bg-rose-50 px-4 py-2 rounded-xl border border-rose-200 text-center">
+                <span class="block text-xs font-semibold text-rose-600 uppercase tracking-wider">Errores</span>
+                <span id="errors-text" class="text-base font-bold text-rose-700">0</span>
+            </div>
+            <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-200 text-center">
+                <span class="block text-xs font-semibold text-blue-600 uppercase tracking-wider">Tiempo</span>
+                <span id="timer-text" class="text-base font-bold text-blue-700">00:00</span>
+            </div>
+            <button onclick="initGame()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-sm active:scale-95 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reiniciar
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="max-w-4xl mx-auto w-full my-6 flex flex-col items-center justify-center flex-grow">
+        
+        <!-- Instrucción rápida -->
+        <div class="mb-4 text-center">
+            <p class="text-sm font-semibold text-slate-500 bg-white/60 px-4 py-1.5 rounded-full inline-block border border-slate-200 shadow-sm">
+                💡 Arrastra la tarjeta a su gaveta correspondiente o haz clic directo en los botones inferiores.
+            </p>
+        </div>
+
+        <!-- Tarjeta Central Dinámica (Opción 3: Swipe & Archivero) -->
+        <div id="card-container" class="w-full max-w-md mb-8">
+            <div id="account-card" 
+                 draggable="true" 
+                 ondragstart="drag(event)"
+                 class="w-full h-48 bg-white rounded-3xl custom-shadow border-2 border-slate-200 flex flex-col items-center justify-center p-8 text-center cursor-grab active:cursor-grabbing transition-transform duration-200 hover:scale-[1.02] relative overflow-hidden group">
+                
+                <div class="absolute top-3 left-4 text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2.5 py-1 rounded-lg">
+                    Cuenta Contable
+                </div>
+                
+                <div class="absolute top-3 right-4 text-slate-300 group-hover:text-slate-400 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                </div>
+
+                <h2 id="account-title" class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mt-4">
+                    Cargando cuenta...
+                </h2>
+
+                <div class="absolute bottom-3 text-xs text-slate-400 font-medium">
+                    Suelta o presiona la gaveta correcta
+                </div>
+            </div>
+        </div>
+
+        <!-- Gavetas / Botones de Categorías (Opción 1: Archivero Contable) -->
+        <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- ACTIVO -->
+            <div ondragover="allowDrop(event)" ondrop="drop(event, 'activo')" onclick="checkAnswer('activo')"
+                 class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl p-5 shadow-lg cursor-pointer transition-all duration-200 transform hover:-translate-y-1 active:translate-y-0 flex flex-col justify-between h-36 border-b-4 border-emerald-800 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider bg-emerald-700/50 px-2.5 py-1 rounded-lg">Gaveta 1</span>
+                    <span class="text-xs font-mono bg-emerald-900/40 px-2 py-0.5 rounded">#27AE60</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black tracking-wide">ACTIVO</h3>
+                    <p class="text-xs text-emerald-100 font-medium mt-0.5">Bienes y derechos a favor</p>
+                </div>
+            </div>
+
+            <!-- PASIVO -->
+            <div ondragover="allowDrop(event)" ondrop="drop(event, 'pasivo')" onclick="checkAnswer('pasivo')"
+                 class="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl p-5 shadow-lg cursor-pointer transition-all duration-200 transform hover:-translate-y-1 active:translate-y-0 flex flex-col justify-between h-36 border-b-4 border-blue-800 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider bg-blue-700/50 px-2.5 py-1 rounded-lg">Gaveta 2</span>
+                    <span class="text-xs font-mono bg-blue-900/40 px-2 py-0.5 rounded">#2980DB</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black tracking-wide">PASIVO</h3>
+                    <p class="text-xs text-blue-100 font-medium mt-0.5">Deudas y obligaciones</p>
+                </div>
+            </div>
+
+            <!-- RESULTADO POSITIVO -->
+            <div ondragover="allowDrop(event)" ondrop="drop(event, 'positivo')" onclick="checkAnswer('positivo')"
+                 class="bg-orange-600 hover:bg-orange-700 text-white rounded-2xl p-5 shadow-lg cursor-pointer transition-all duration-200 transform hover:-translate-y-1 active:translate-y-0 flex flex-col justify-between h-36 border-b-4 border-orange-800 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider bg-orange-700/50 px-2.5 py-1 rounded-lg">Gaveta 3</span>
+                    <span class="text-xs font-mono bg-orange-900/40 px-2 py-0.5 rounded">#E67E22</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-black tracking-wide">RESULTADO POSITIVO</h3>
+                    <p class="text-xs text-orange-100 font-medium mt-0.5">Ingresos y ganancias</p>
+                </div>
+            </div>
+
+            <!-- RESULTADO NEGATIVO -->
+            <div ondragover="allowDrop(event)" ondrop="drop(event, 'negativo')" onclick="checkAnswer('negativo')"
+                 class="bg-red-600 hover:bg-red-700 text-white rounded-2xl p-5 shadow-lg cursor-pointer transition-all duration-200 transform hover:-translate-y-1 active:translate-y-0 flex flex-col justify-between h-36 border-b-4 border-red-800 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider bg-red-700/50 px-2.5 py-1 rounded-lg">Gaveta 4</span>
+                    <span class="text-xs font-mono bg-red-900/40 px-2 py-0.5 rounded">#C0392B</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-black tracking-wide">RESULTADO NEGATIVO</h3>
+                    <p class="text-xs text-red-100 font-medium mt-0.5">Egresos y pérdidas</p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal de Reporte de Auditoría / Pantalla Final -->
+    <div id="audit-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 custom-shadow border border-slate-100 text-center animate-in fade-in zoom-in duration-300">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">¡Auditoría Completada!</h2>
+            <p id="audit-subtitle" class="text-sm text-slate-500 mt-1 mb-6">Has clasificado correctamente todas las cuentas contables del ejercicio.</p>
+
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <span class="block text-xs font-semibold text-slate-400 uppercase">Aciertos</span>
+                    <span id="modal-score" class="text-xl font-black text-emerald-600">22</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <span class="block text-xs font-semibold text-slate-400 uppercase">Errores</span>
+                    <span id="modal-errors" class="text-xl font-black text-rose-600">0</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <span class="block text-xs font-semibold text-slate-400 uppercase">Tiempo</span>
+                    <span id="modal-time" class="text-xl font-black text-blue-600">01:15</span>
+                </div>
+            </div>
+
+            <div id="audit-badge" class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-2xl text-sm font-bold mb-6">
+                🏆 Categoría: Auditor Contable Senior
+            </div>
+
+            <button onclick="initGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-98 text-base">
+                Jugar de Nuevo (Reordenar Cuentas)
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer info -->
+    <footer class="max-w-5xl mx-auto w-full text-center text-xs text-slate-400 mt-4">
+        Contabilidad Interactiva • Diseñado con formato híbrido (Archivero + Tarjetas Dinámicas)
+    </footer>
+
+    <!-- JavaScript del Juego -->
+    <script>
+        // Listado exacto de cuentas y categorías
+        const rawAccounts = [
+            // ACTIVO (Verde #27AE60)
+            { name: "Caja", category: "activo" },
+            { name: "Banco", category: "activo" },
+            { name: "Deudores por venta", category: "activo" },
+            { name: "Deudores por venta Morosos", category: "activo" },
+            { name: "Documentos por cobrar", category: "activo" },
+            { name: "Inmueble", category: "activo" },
+            { name: "Valores a Depositar", category: "activo" },
+            { name: "Rodados", category: "activo" },
+            { name: "Muebles y utiles", category: "activo" },
+            { name: "Equipos de computación", category: "activo" },
+            { name: "Mercaderias", category: "activo" },
+            { name: "Instalaciones", category: "activo" },
+
+            // PASIVO (Azul #2980DB)
+            { name: "proveedores", category: "pasivo" },
+            { name: "Documentos a pagar", category: "pasivo" },
+            { name: "Acreedores varios", category: "pasivo" },
+            { name: "Sueldos y Jornales a pagar", category: "pasivo" },
+
+            // RESULTADO POSITIVO (Naranja #E67E22)
+            { name: "Ventas", category: "positivo" },
+            { name: "Intereses ganados", category: "positivo" },
+            { name: "Descuentos ganados", category: "positivo" },
+
+            // RESULTADO NEGATIVO (Rojo #C0392B)
+            { name: "CMV", category: "negativo" },
+            { name: "Intereses perdidos", category: "negativo" },
+            { name: "Descuentos perdido", category: "negativo" }
+        ];
+
+        let accounts = [];
+        let currentIndex = 0;
+        let score = 0;
+        let errors = 0;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let isProcessing = false;
+
+        // Función Fisher-Yates para barajar al azar
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initGame() {
+            // Ocultar modal si estaba abierto
+            document.getElementById('audit-modal').classList.add('hidden');
+            
+            // Barajar cuentas al azar (Requisito Obligatorio 1)
+            accounts = shuffleArray(rawAccounts);
+            currentIndex = 0;
+            score = 0;
+            errors = 0;
+            secondsElapsed = 0;
+            isProcessing = false;
+
+            updateStats();
+            loadCurrentAccount();
+            startTimer();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer-text').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function loadCurrentAccount() {
+            if (currentIndex >= accounts.length) {
+                endGame();
+                return;
+            }
+
+            const card = document.getElementById('account-card');
+            const title = document.getElementById('account-title');
+            
+            card.classList.remove('animate-fly', 'animate-shake');
+            title.innerText = accounts[currentIndex].name;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${accounts.length}`;
+        }
+
+        function checkAnswer(selectedCategory) {
+            if (isProcessing || currentIndex >= accounts.length) return;
+            isProcessing = true;
+
+            const currentAccount = accounts[currentIndex];
+            const card = document.getElementById('account-card');
+
+            if (selectedCategory === currentAccount.category) {
+                // Acierto
+                score++;
+                document.getElementById('score-text').innerText = score;
+                card.classList.add('animate-fly');
+                
+                setTimeout(() => {
+                    currentIndex++;
+                    loadCurrentAccount();
+                    isProcessing = false;
+                }, 350);
+            } else {
+                // Error
+                errors++;
+                document.getElementById('errors-text').innerText = errors;
+                card.classList.add('animate-shake');
+                
+                setTimeout(() => {
+                    card.classList.remove('animate-shake');
+                    isProcessing = false;
+                }, 400);
+            }
+        }
+
+        // Funciones de Drag & Drop
+        function drag(ev) {
+            ev.dataTransfer.setData("text/plain", accounts[currentIndex].category);
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drop(ev, category) {
+            ev.preventDefault();
+            checkAnswer(category);
+        }
+
+        function updateStats() {
+            document.getElementById('score-text').innerText = score;
+            document.getElementById('errors-text').innerText = errors;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${accounts.length}`;
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            
+            const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+            const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+            const timeFormatted = `${mins}:${secs}`;
+
+            document.getElementById('modal-score').innerText = score;
+            document.getElementById('modal-errors').innerText = errors;
+            document.getElementById('modal-time').innerText = timeFormatted;
+
+            // Determinar calificación según errores
+            const badge = document.getElementById('audit-badge');
+            if (errors === 0) {
+                badge.className = "bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-sm font-bold mb-6";
+                badge.innerHTML = "🌟 ¡Excelente! GUACHIN (Puntuación Perfecta)";
+            } else if (errors <= 3) {
+                badge.className = "bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl text-sm font-bold mb-6";
+                badge.innerHTML = "💼 Muy bien! guachin";
+            } else {
+                badge.className = "bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-2xl text-sm font-bold mb-6";
+                badge.innerHTML = "📚 Buen intento. ¡Sigue practicando la clasificación de cuentas!";
+            }
+
+            document.getElementById('audit-modal').classList.remove('hidden');
+        }
+
+        // Iniciar al cargar la ventana
+        window.onload = function() {
+            initGame();
+        };
+    </script>
+</body>
+</html>
