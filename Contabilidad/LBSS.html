@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Contabilidad Examen Final</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Estilos personalizados para los gradientes de las filas según el tipo */
+        .row-aplus { background: linear-gradient(to right, #f0fdf4, #dcfce7); color: #1e293b; }
+        .row-pmin  { background: linear-gradient(to right, #fdf2f8, #fce7f3); color: #16a34a; } /* Letras en verdecito */
+        .row-rmin  { background: linear-gradient(to right, #fef2f2, #fee2e2); color: #000000; font-weight: 600; } /* Letras en negro */
+        .row-amin  { background: linear-gradient(to right, #f0fdf4, #dcfce7); color: #db2777; } /* Letras rosadito */
+        .row-pplus { background: linear-gradient(to right, #fdf2f8, #fce7f3); color: #1e293b; }
+        .row-rplus { background: linear-gradient(to right, #eff6ff, #dbeafe); color: #1e293b; }
+        .row-pn    { background: linear-gradient(to right, #f1f5f9, #e2e8f0); color: #1e293b; font-weight: 500; }
+        .row-s     { background: linear-gradient(to right, #1e293b, #0f172a); color: #ffffff; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-4 md:p-6">
+
+    <!-- Header / Navbar -->
+    <header class="max-w-7xl mx-auto w-full bg-white rounded-2xl p-4 md:p-6 custom-shadow border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 text-white p-3 rounded-xl shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">Sistema de Contabilidad - Examen Final</h1>
+                <p class="text-xs md:text-sm text-slate-500 font-medium">Libro Diario Interactivo & Cuadro de Sumas y Saldos Automático</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="addRow()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-all shadow-sm active:scale-95 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Agregar Fila
+            </button>
+            <button onclick="clearTable()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-sm transition-all active:scale-95">
+                Limpiar Todo
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Two-Panel Layout -->
+    <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+        
+        <!-- Left Panel: Libro Diario / Variaciones (7 cols) -->
+        <section class="lg:col-span-7 bg-white rounded-2xl custom-shadow border border-slate-100 p-4 md:p-6 flex flex-col">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Libro Diario / Variaciones</h2>
+                <span class="text-xs font-semibold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-200">4 Columnas Dinámicas</span>
+            </div>
+
+            <div class="overflow-x-auto flex-grow">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                            <th class="p-2.5 w-24">Tipo</th>
+                            <th class="p-2.5">Detalle de Cuenta</th>
+                            <th class="p-2.5 w-28 text-right">Debe</th>
+                            <th class="p-2.5 w-28 text-right">Haber</th>
+                            <th class="p-2.5 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="journal-tbody" class="divide-y divide-slate-100 text-sm">
+                        <!-- Las filas se renderizan dinámicamente aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Right Panel: Cuadro de Sumas y Saldos (5 cols) -->
+        <section class="lg:col-span-5 bg-white rounded-2xl custom-shadow border border-slate-100 p-4 md:p-6 flex flex-col">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Cuadro de Sumas y Saldos</h2>
+                <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Actualización en Vivo</span>
+            </div>
+
+            <div class="overflow-x-auto flex-grow">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                            <th class="p-2">CUENTA</th>
+                            <th class="p-2 text-right">DEBE</th>
+                            <th class="p-2 text-right">HABER</th>
+                            <th class="p-2 text-right">SSDD</th>
+                            <th class="p-2 text-right">SSAA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summary-tbody" class="divide-y divide-slate-100 text-xs font-medium">
+                        <!-- Se llena automáticamente con cuentas únicas -->
+                    </tbody>
+                    <tfoot id="summary-tfoot" class="border-t-2 border-slate-200 font-bold text-xs">
+                        <!-- Totales generales -->
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-400 mt-6">
+        Sistema Contable Interactivo • Diseñado para Examen Final con Alineación y Gradientes Inteligentes
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Estado inicial con 4 filas vacías listas para usar
+        let rows = [
+            { type: 'A+', detail: '', debe: '', haber: '' },
+            { type: 'A+', detail: '', debe: '', haber: '' },
+            { type: 'P+', detail: '', debe: '', haber: '' },
+            { type: 'S',  detail: '', debe: '', haber: '' }
+        ];
+
+        // Mapeo de clases CSS para los gradientes y colores de texto solicitados
+        function getRowStyleClass(type) {
+            switch(type) {
+                case 'A+': return 'row-aplus';
+                case 'P-': return 'row-pmin';
+                case 'R-': return 'row-rmin';
+                case 'A-': return 'row-amin';
+                case 'P+': return 'row-pplus';
+                case 'R+': return 'row-rplus';
+                case 'PN': return 'row-pn';
+                case 'S':  return 'row-s';
+                default:   return '';
+            }
+        }
+
+        // Determina si habilita Debe o Haber y la alineación del texto
+        function getFieldRules(type) {
+            // A+, P-, R- -> Detalle izquierda, Debe habilitado, Haber deshabilitado
+            if (['A+', 'P-', 'R-'].includes(type)) {
+                return { align: 'text-left', debeDisabled: false, haberDisabled: true };
+            }
+            // A-, P+, R+, PN -> Detalle derecha, Haber habilitado, Debe deshabilitado
+            if (['A-', 'P+', 'R+', 'PN'].includes(type)) {
+                return { align: 'text-right', debeDisabled: true, haberDisabled: false };
+            }
+            // S -> Fila especial de Sumas
+            if (type === 'S') {
+                return { align: 'text-center font-bold', debeDisabled: true, haberDisabled: true };
+            }
+            return { align: 'text-left', debeDisabled: false, haberDisabled: false };
+        }
+
+        function renderJournal() {
+            const tbody = document.getElementById('journal-tbody');
+            tbody.innerHTML = '';
+
+            // Calcular sumas acumuladas para la validación de la fila 'S'
+            let runningDebe = 0;
+            let runningHaber = 0;
+
+            rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                const styleClass = getRowStyleClass(row.type);
+                const rules = getFieldRules(row.type);
+
+                tr.className = `transition-colors duration-150 ${styleClass}`;
+
+                if (row.type === 'S') {
+                    // Fila especial S (Sumas y Saldo)
+                    const isBalanced = Math.abs(runningDebe - runningHaber) < 0.01;
+                    tr.innerHTML = `
+                        <td class="p-2">
+                            <select onchange="updateRowType(${index}, this.value)" class="bg-slate-800 text-white font-bold text-xs rounded-lg px-2 py-1.5 border border-slate-700 outline-none cursor-pointer">
+                                <option value="A+" ${row.type==='A+'?'selected':''}>A+</option>
+                                <option value="P-" ${row.type==='P-'?'selected':''}>P-</option>
+                                <option value="R-" ${row.type==='R-'?'selected':''}>R-</option>
+                                <option value="A-" ${row.type==='A-'?'selected':''}>A-</option>
+                                <option value="P+" ${row.type==='P+'?'selected':''}>P+</option>
+                                <option value="R+" ${row.type==='R+'?'selected':''}>R+</option>
+                                <option value="PN" ${row.type==='PN'?'selected':''}>PN</option>
+                                <option value="S"  ${row.type==='S'?'selected':''}>S</option>
+                            </select>
+                        </td>
+                        <td class="p-2 font-bold tracking-wider text-center" colspan="2">
+                            SUMAS Y SALDOS ${isBalanced ? '✅ (Balanceado)' : ''}
+                        </td>
+                        <td class="p-2 text-right font-mono font-bold">${runningDebe.toLocaleString('es-AR')}</td>
+                        <td class="p-2 text-right font-mono font-bold">${runningHaber.toLocaleString('es-AR')}</td>
+                        <td class="p-2 text-center">
+                            <button onclick="deleteRow(${index})" class="text-slate-400 hover:text-red-400 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </td>
+                    `;
+                } else {
+                    // Acumular para verificación de fila S
+                    const dVal = parseFloat(row.debe) || 0;
+                    const hVal = parseFloat(row.haber) || 0;
+                    runningDebe += dVal;
+                    runningHaber += hVal;
+
+                    tr.innerHTML = `
+                        <td class="p-2">
+                            <select onchange="updateRowType(${index}, this.value)" class="bg-white/80 backdrop-blur text-slate-800 font-semibold text-xs rounded-lg px-2 py-1.5 border border-slate-200 outline-none cursor-pointer shadow-sm">
+                                <option value="A+" ${row.type==='A+'?'selected':''}>A+</option>
+                                <option value="P-" ${row.type==='P-'?'selected':''}>P-</option>
+                                <option value="R-" ${row.type==='R-'?'selected':''}>R-</option>
+                                <option value="A-" ${row.type==='A-'?'selected':''}>A-</option>
+                                <option value="P+" ${row.type==='P+'?'selected':''}>P+</option>
+                                <option value="R+" ${row.type==='R+'?'selected':''}>R+</option>
+                                <option value="PN" ${row.type==='PN'?'selected':''}>PN</option>
+                                <option value="S"  ${row.type==='S'?'selected':''}>S</option>
+                            </select>
+                        </td>
+                        <td class="p-2">
+                            <input type="text" value="${row.detail}" oninput="updateRowDetail(${index}, this.value)" placeholder="Nombre de cuenta..." 
+                                   class="w-full bg-transparent border-b border-slate-300/60 focus:border-indigo-600 outline-none py-1 px-1 ${rules.align} uppercase font-medium">
+                        </td>
+                        <td class="p-2">
+                            <input type="number" value="${row.debe}" oninput="updateRowDebe(${index}, this.value)" ${rules.debeDisabled ? 'disabled' : ''} placeholder="0"
+                                   class="w-full bg-transparent border-b border-slate-300/60 focus:border-indigo-600 outline-none py-1 px-1 text-right font-mono ${rules.debeDisabled ? 'opacity-30' : ''}">
+                        </td>
+                        <td class="p-2">
+                            <input type="number" value="${row.haber}" oninput="updateRowHaber(${index}, this.value)" ${rules.haberDisabled ? 'disabled' : ''} placeholder="0"
+                                   class="w-full bg-transparent border-b border-slate-300/60 focus:border-indigo-600 outline-none py-1 px-1 text-right font-mono ${rules.haberDisabled ? 'opacity-30' : ''}">
+                        </td>
+                        <td class="p-2 text-center">
+                            <button onclick="deleteRow(${index})" class="text-slate-400 hover:text-red-500 transition-colors p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+
+            renderSummary();
+        }
+
+        function updateRowType(index, newType) {
+            rows[index].type = newType;
+            if (['A-', 'P+', 'R+', 'PN'].includes(newType)) {
+                rows[index].debe = '';
+            } else if (['A+', 'P-', 'R-'].includes(newType)) {
+                rows[index].haber = '';
+            }
+            renderJournal();
+        }
+
+        function updateRowDetail(index, val) {
+            rows[index].detail = val;
+            renderSummary(); // Actualiza panel derecho en vivo sin perder foco
+        }
+
+        function updateRowDebe(index, val) {
+            rows[index].debe = val;
+            renderSummary();
+            // Actualizar fila S si existe más abajo sin redibujar todo el DOM para evitar pérdida de foco
+        }
+
+        function updateRowHaber(index, val) {
+            rows[index].haber = val;
+            renderSummary();
+        }
+
+        function addRow() {
+            rows.push({ type: 'A+', detail: '', debe: '', haber: '' });
+            renderJournal();
+        }
+
+        function deleteRow(index) {
+            rows.splice(index, 1);
+            renderJournal();
+        }
+
+        function clearTable() {
+            rows = [
+                { type: 'A+', detail: '', debe: '', haber: '' },
+                { type: 'A+', detail: '', debe: '', haber: '' }
+            ];
+            renderJournal();
+        }
+
+        // Lógica del Cuadro de Sumas y Saldos (Panel Derecho)
+        function renderSummary() {
+            const summaryTbody = document.getElementById('summary-tbody');
+            const summaryTfoot = document.getElementById('summary-tfoot');
+            summaryTbody.innerHTML = '';
+
+            // Agrupar cuentas únicas del libro diario
+            const accountsMap = {};
+
+            rows.forEach(row => {
+                if (row.type !== 'S' && row.detail.trim() !== '') {
+                    const accName = row.detail.trim().toUpperCase();
+                    if (!accountsMap[accName]) {
+                        accountsMap[accName] = { debe: 0, haber: 0 };
+                    }
+                    accountsMap[accName].debe += parseFloat(row.debe) || 0;
+                    accountsMap[accName].haber += parseFloat(row.haber) || 0;
+                }
+            });
+
+            let totalDebe = 0;
+            let totalHaber = 0;
+            let totalSsdd = 0;
+            let totalSsaa = 0;
+
+            const accountNames = Object.keys(accountsMap);
+
+            if (accountNames.length === 0) {
+                summaryTbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Escribe cuentas en el libro diario para generar el cuadro...</td></tr>`;
+                summaryTfoot.innerHTML = ``;
+                return;
+            }
+
+            accountNames.forEach(acc => {
+                const d = accountsMap[acc].debe;
+                const h = accountsMap[acc].haber;
+                totalDebe += d;
+                totalHaber += h;
+
+                // Cálculo de SSDD o SSAA sin números negativos
+                let ssdd = '';
+                let ssaa = '';
+                const diff = d - h;
+                if (diff > 0) {
+                    ssdd = diff;
+                    totalSsdd += diff;
+                } else if (diff < 0) {
+                    ssaa = Math.abs(diff);
+                    totalSsaa += Math.abs(diff);
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-2 font-semibold text-slate-700">${acc}</td>
+                    <td class="p-2 text-right font-mono">${d > 0 ? d.toLocaleString('es-AR') : ''}</td>
+                    <td class="p-2 text-right font-mono">${h > 0 ? h.toLocaleString('es-AR') : ''}</td>
+                    <td class="p-2 text-right font-mono text-indigo-600">${ssdd !== '' ? ssdd.toLocaleString('es-AR') : ''}</td>
+                    <td class="p-2 text-right font-mono text-rose-600">${ssaa !== '' ? ssaa.toLocaleString('es-AR') : ''}</td>
+                `;
+                summaryTbody.appendChild(tr);
+            });
+
+            // Fila de totales generales
+            summaryTfoot.innerHTML = `
+                <tr class="bg-slate-50 text-slate-900">
+                    <td class="p-2.5 uppercase font-extrabold">Totales</td>
+                    <td class="p-2.5 text-right font-mono font-bold">${totalDebe.toLocaleString('es-AR')}</td>
+                    <td class="p-2.5 text-right font-mono font-bold">${totalHaber.toLocaleString('es-AR')}</td>
+                    <td class="p-2.5 text-right font-mono font-bold text-indigo-700">${totalSsdd.toLocaleString('es-AR')}</td>
+                    <td class="p-2.5 text-right font-mono font-bold text-rose-700">${totalSsaa.toLocaleString('es-AR')}</td>
+                </tr>
+            `;
+        }
+
+        // Inicializar al cargar
+        window.onload = function() {
+            renderJournal();
+        };
+    </script>
+</body>
+</html>
