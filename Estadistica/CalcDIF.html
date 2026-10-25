@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Estadística Interactiva - Nivel Medio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { 
+            -moz-appearance: textfield; 
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-lg py-5 px-4 md:px-8">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-600 p-3 rounded-2xl text-white shadow-lg shadow-amber-500/30">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Calculadora Estadística Interactiva</h1>
+                    <p class="text-xs text-amber-400 font-medium uppercase tracking-wider">Nivel Medio • Práctica con Autoevaluación Inteligente</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="cargarEjemplo()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3.5 py-2 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Cargar Ejemplo
+                </button>
+                <button onclick="reiniciarTodo()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-2 border border-slate-600">
+                    <i class="fa-solid fa-rotate-right"></i> Limpiar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-6 space-y-6">
+        
+        <!-- Botonera Principal (2 Botones principales solicitados) -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-amber-400"></i> Panel de Control del Ejercicio
+                </h3>
+                <p class="text-xs text-slate-400">Ingresa <strong class="text-amber-300">X</strong> y <strong class="text-amber-300">fa</strong>, presiona <span class="text-indigo-300 font-semibold">Cargar tabla</span> para iniciar la práctica y al terminar presiona <span class="text-emerald-300 font-semibold">AUTOEVALUACION</span>.</p>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="ejecutarCargarTabla()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-3 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-table-cells"></i> Cargar tabla
+                </button>
+                <button onclick="ejecutarAutoevaluacion()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-square-check text-sm"></i> AUTOEVALUACION
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal de Resultado / Calificación -->
+        <div id="modal-evaluacion" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center space-y-4">
+                <div id="modal-icono" class="text-4xl text-amber-400"><i class="fa-solid fa-award"></i></div>
+                <h3 id="modal-titulo" class="text-lg font-bold text-white">Resultado de Autoevaluación</h3>
+                <div id="modal-contenido" class="text-sm text-slate-300 space-y-2">
+                    <!-- Dinámico -->
+                </div>
+                <button onclick="cerrarModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition w-full">
+                    Continuar Practicando
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección 1: Tabla de Frecuencias -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <div>
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table text-amber-400"></i> Tabla de Frecuencias (Nivel Medio)
+                    </h2>
+                    <p class="text-xs text-slate-400">Columnas a completar <strong class="text-amber-300">2 celdas vacías por columna</strong>.</p>
+                </div>
+                <button onclick="agregarFila()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition border border-slate-600 flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Agregar Fila X
+                </button>
+            </div>
+
+            <!-- Tabla de 7 Columnas -->
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-700/70 text-slate-200 uppercase text-[10px] tracking-wider border-b border-slate-600">
+                        <tr>
+                            <th class="px-3 py-3 text-center">X (Variable)</th>
+                            <th class="px-3 py-3 text-center">fa (Freq.)</th>
+                            <th class="px-3 py-3 text-center">fr (0 a 1)</th>
+                            <th class="px-3 py-3 text-center">FR (Acum. 0-1)</th>
+                            <th class="px-3 py-3 text-center">FA (Acum.)</th>
+                            <th class="px-3 py-3 text-center">X · fa</th>
+                            <th class="px-3 py-3 text-center">(X - x̄)² · fa</th>
+                            <th class="px-3 py-3 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo" class="divide-y divide-slate-700/50 bg-slate-800/40">
+                        <!-- Generado por JS -->
+                    </tbody>
+                    <tfoot id="tabla-pie" class="bg-slate-700/40 font-semibold text-white border-t border-slate-600">
+                        <!-- Generado por JS -->
+                    </tfoot>
+                </table>
+            </div>
+            <div id="mensaje-error" class="hidden mt-3 p-3 bg-rose-900/40 border border-rose-700 text-rose-300 text-xs rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span id="texto-error">Por favor completa valores válidos.</span>
+            </div>
+        </div>
+
+        <!-- Sección 2: Resultados de Análisis (Tendencia Central y Dispersión) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <!-- Tendencia Central (1 automática al azar, 2 manuales) -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-bullseye text-amber-400"></i> Medidas de Tendencia Central (1 dada, 2 para resolver)
+                </h3>
+                <div id="container-tendencia" class="space-y-2.5 text-xs">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+            <!-- Dispersión (2 automáticas al azar, 2 manuales) -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-pie text-amber-400"></i> Medidas de Dispersión (2 dadas, 2 para resolver)
+                </h3>
+                <div id="container-dispersion" class="space-y-2.5 text-xs">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sección 3: Gráficos y Caja de Bigotes -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            
+            <!-- Histograma con Polígono de Frecuencias Centrado y Datos -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-column text-emerald-400"></i> Histograma y Polígono de Frecuencias
+                </h3>
+                <div class="relative flex-grow flex items-center justify-center min-h-[260px]">
+                    <canvas id="chartHistograma"></canvas>
+                </div>
+            </div>
+
+            <!-- Diagrama de Caja y Bigotes (4 automáticas al azar, 4 manuales) -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                        <i class="fa-solid fa-box-archive text-amber-400"></i> Caja y Bigotes (4 dadas, 4 para resolver)
+                    </h3>
+                    <div id="container-boxplot-inputs" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
+                        <!-- Dinámico -->
+                    </div>
+                </div>
+                <!-- Contenedor SVG Boxplot -->
+                <div id="svg-boxplot-container" class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 flex items-center justify-center min-h-[130px] overflow-x-auto">
+                    <span class="text-xs text-slate-500 italic">Presiona "Cargar tabla" para generar el diagrama gráfico</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800/60 border-t border-slate-700/60 py-3 px-6 text-center text-xs text-slate-400 mt-auto">
+        Calculadora Estadística Interactiva • Nivel Medio &copy; 2026
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let datos = [
+            { x: 4, fa: 1 },
+            { x: 5, fa: 2 },
+            { x: 6, fa: 3 },
+            { x: 7, fa: 4 },
+            { x: 8, fa: 3 },
+            { x: 9, fa: 1 },
+            { x: 11, fa: 1 }
+        ];
+
+        let chartHistInstance = null;
+        let puzzleConfig = {
+            tableBlanks: {},
+            tendenciaReveal: 0,
+            dispersionReveal: [],
+            boxplotReveal: []
+        };
+
+        let respuestasCorrectasCache = {};
+
+        window.onload = function() {
+            renderizarTablaBase(false);
+            renderizarPanelesVacios();
+        };
+
+        function cargarEjemplo() {
+            datos = [
+                { x: 4, fa: 1 },
+                { x: 5, fa: 2 },
+                { x: 6, fa: 3 },
+                { x: 7, fa: 4 },
+                { x: 8, fa: 3 },
+                { x: 9, fa: 1 },
+                { x: 11, fa: 1 }
+            ];
+            ejecutarCargarTabla();
+        }
+
+        function reiniciarTodo() {
+            datos = [{ x: 0, fa: 1 }];
+            renderizarTablaBase(false);
+            renderizarPanelesVacios();
+            if (chartHistInstance) { chartHistInstance.destroy(); chartHistInstance = null; }
+            document.getElementById('svg-boxplot-container').innerHTML = '<span class="text-xs text-slate-500 italic">Presiona "Cargar tabla" para generar el diagrama gráfico</span>';
+        }
+
+        function agregarFila() {
+            datos.push({ x: 0, fa: 1 });
+            renderizarTablaBase(false);
+        }
+
+        function eliminarFila(index) {
+            if (datos.length <= 1) {
+                mostrarError("Debe haber al menos una fila en la tabla.");
+                return;
+            }
+            datos.splice(index, 1);
+            renderizarTablaBase(false);
+        }
+
+        function actualizarDato(index, campo, valor) {
+            const val = parseFloat(valor);
+            datos[index][campo] = isNaN(val) ? 0 : val;
+        }
+
+        function mostrarError(mensaje) {
+            const errBox = document.getElementById('mensaje-error');
+            const txtErr = document.getElementById('texto-error');
+            txtErr.textContent = mensaje;
+            errBox.classList.remove('hidden');
+            setTimeout(() => { errBox.classList.add('hidden'); }, 4000);
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-evaluacion').classList.add('hidden');
+        }
+
+        function renderizarPanelesVacios() {
+            document.getElementById('container-tendencia').innerHTML = `
+                <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700"><span class="text-slate-300">Media (x̄)</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700"><span class="text-slate-300">Mediana (Me)</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700"><span class="text-slate-300">Moda (Mo)</span><span class="text-slate-500">-</span></div>
+            `;
+            document.getElementById('container-dispersion').innerHTML = `
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Rango</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Varianza (s²)</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Desvío (s)</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Coef. Variación (CV)</span><span class="text-slate-500">-</span></div>
+            `;
+            const boxNames = ['MIN', 'Q1', 'Q2 (Me)', 'Q3', 'MAX', 'RIQ', 'LI', 'LS'];
+            let boxHtml = '';
+            boxNames.forEach((name) => {
+                boxHtml += `
+                    <div class="bg-slate-700/40 p-2 rounded-xl border border-slate-700 text-center">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">${name}</span>
+                        <span class="text-sm font-bold text-slate-500">-</span>
+                    </div>
+                `;
+            });
+            document.getElementById('container-boxplot-inputs').innerHTML = boxHtml;
+        }
+
+        function ejecutarCargarTabla() {
+            if (datos.length === 0) {
+                mostrarError("Ingresa datos en la tabla.");
+                return;
+            }
+
+            puzzleConfig.tableBlanks = {};
+            for (let col = 0; col < 5; col++) {
+                let filasElegidas = new Set();
+                while (filasElegidas.size < Math.min(datos.length, 2)) {
+                    let fIdx = Math.floor(Math.random() * datos.length);
+                    filasElegidas.add(fIdx);
+                }
+                filasElegidas.forEach(fIdx => {
+                    puzzleConfig.tableBlanks[`${fIdx}-${col}`] = true;
+                });
+            }
+
+            puzzleConfig.tendenciaReveal = Math.floor(Math.random() * 3);
+
+            let dispArr = [0, 1, 2, 3];
+            shuffleArray(dispArr);
+            puzzleConfig.dispersionReveal = [dispArr[0], dispArr[1]];
+
+            let boxArr = [0, 1, 2, 3, 4, 5, 6, 7];
+            shuffleArray(boxArr);
+            puzzleConfig.boxplotReveal = [boxArr[0], boxArr[1], boxArr[2], boxArr[3]];
+
+            renderizarTablaBase(true);
+            renderizarResultadosMedio();
+            ejecutarHistograma();
+            ejecutarCajaBigotesGrafico();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function obtenerDatosCalculados() {
+            let N = 0;
+            datos.forEach(d => N += d.fa);
+            let FA_acc = 0;
+            let sumaXfi = 0;
+            let arrExpandido = [];
+            let datosOrdenadosX = [...datos].sort((a, b) => a.x - b.x);
+
+            datosOrdenadosX.forEach(d => {
+                FA_acc += d.fa;
+                sumaXfi += d.x * d.fa;
+                for (let i = 0; i < d.fa; i++) { arrExpandido.push(d.x); }
+            });
+
+            let media = N > 0 ? sumaXfi / N : 0;
+            let sumaCuadratica = 0;
+            datosOrdenadosX.forEach(d => {
+                sumaCuadratica += Math.pow(d.x - media, 2) * d.fa;
+            });
+
+            let mediana = 0;
+            if (arrExpandido.length > 0) {
+                let mid = Math.floor(arrExpandido.length / 2);
+                if (arrExpandido.length % 2 === 0) {
+                    mediana = (arrExpandido[mid - 1] + arrExpandido[mid]) / 2;
+                } else {
+                    mediana = arrExpandido[mid];
+                }
+            }
+
+            let frecuenciasMap = {};
+            datos.forEach(d => { frecuenciasMap[d.x] = (frecuenciasMap[d.x] || 0) + d.fa; });
+            let maxFa = -1;
+            let modas = [];
+            for (let x in frecuenciasMap) {
+                if (frecuenciasMap[x] > maxFa) {
+                    maxFa = frecuenciasMap[x];
+                    modas = [parseInt(x)];
+                } else if (frecuenciasMap[x] === maxFa) {
+                    modas.push(parseInt(x));
+                }
+            }
+
+            let minX = datosOrdenadosX.length > 0 ? datosOrdenadosX[0].x : 0;
+            let maxX = datosOrdenadosX.length > 0 ? datosOrdenadosX[datosOrdenadosX.length - 1].x : 0;
+            let rango = maxX - minX;
+            let varianza = N > 1 ? sumaCuadratica / (N - 1) : 0;
+            let desvio = Math.sqrt(varianza);
+            let cv = media > 0 ? (desvio / media) * 100 : 0;
+
+            let min = arrExpandido.length > 0 ? arrExpandido[0] : 0;
+            let max = arrExpandido.length > 0 ? arrExpandido[arrExpandido.length - 1] : 0;
+            let q1 = calcularPercentil(arrExpandido, 0.25);
+            let q2 = mediana;
+            let q3 = calcularPercentil(arrExpandido, 0.75);
+            let riq = q3 - q1;
+            let li = q1 - 1.5 * riq;
+            let ls = q3 + 1.5 * riq;
+
+            return {
+                N, media, sumaCuadratica, arrExpandido, datosOrdenadosX,
+                mediana, modas: modas.join(', '), rango, varianza, desvio, cv,
+                min, q1, q2, q3, max, riq, li, ls
+            };
+        }
+
+        function calcularPercentil(arr, p) {
+            if (arr.length === 0) return 0;
+            let index = p * (arr.length - 1);
+            let lower = Math.floor(index);
+            let upper = Math.ceil(index);
+            let weight = index - lower;
+            if (upper >= arr.length) return arr[arr.length - 1];
+            return arr[lower] * (1 - weight) + arr[upper] * weight;
+        }
+
+        function renderizarTablaBase(conCalculos) {
+            const tbody = document.getElementById('tabla-cuerpo');
+            const tfoot = document.getElementById('tabla-pie');
+            tbody.innerHTML = '';
+
+            let N = 0;
+            datos.forEach(row => { N += (row.fa > 0 ? row.fa : 0); });
+
+            let calc = obtenerDatosCalculados();
+
+            datos.forEach((item, index) => {
+                let faVal = item.fa;
+                let faAcc = 0;
+                for(let i=0; i<=index; i++) faAcc += datos[i].fa;
+                let frNum = N > 0 ? faVal / N : 0;
+                let FRNum = N > 0 ? faAcc / N : 0;
+                let xfiNum = item.x * faVal;
+                let c7Num = Math.pow(item.x - calc.media, 2) * faVal;
+
+                respuestasCorrectasCache[`t-${index}-0`] = frNum;
+                respuestasCorrectasCache[`t-${index}-1`] = FRNum;
+                respuestasCorrectasCache[`t-${index}-2`] = faAcc;
+                respuestasCorrectasCache[`t-${index}-3`] = xfiNum;
+                respuestasCorrectasCache[`t-${index}-4`] = c7Num;
+
+                let htmlFr = (conCalculos && puzzleConfig.tableBlanks[`${index}-0`]) ? 
+                    `<input type="number" step="any" id="input-t-${index}-0" placeholder="?" class="w-16 bg-slate-900 border border-amber-600 text-amber-300 rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-amber-400">` : (conCalculos ? frNum.toFixed(4) : '-');
+
+                let htmlFR = (conCalculos && puzzleConfig.tableBlanks[`${index}-1`]) ? 
+                    `<input type="number" step="any" id="input-t-${index}-1" placeholder="?" class="w-16 bg-slate-900 border border-amber-600 text-amber-300 rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-amber-400">` : (conCalculos ? FRNum.toFixed(4) : '-');
+
+                let htmlFA = (conCalculos && puzzleConfig.tableBlanks[`${index}-2`]) ? 
+                    `<input type="number" id="input-t-${index}-2" placeholder="?" class="w-16 bg-slate-900 border border-amber-600 text-amber-300 rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-amber-400">` : (conCalculos ? faAcc : '-');
+
+                let htmlXfi = (conCalculos && puzzleConfig.tableBlanks[`${index}-3`]) ? 
+                    `<input type="number" step="any" id="input-t-${index}-3" placeholder="?" class="w-16 bg-slate-900 border border-amber-600 text-amber-300 rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-amber-400">` : (conCalculos ? xfiNum.toFixed(2) : '-');
+
+                let htmlC7 = (conCalculos && puzzleConfig.tableBlanks[`${index}-4`]) ? 
+                    `<input type="number" step="any" id="input-t-${index}-4" placeholder="?" class="w-16 bg-slate-900 border border-amber-600 text-amber-300 rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-amber-400">` : (conCalculos ? c7Num.toFixed(2) : '-');
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-700/20 transition">
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" value="${item.x}" oninput="actualizarDato(${index}, 'x', this.value)" 
+                                class="w-16 bg-slate-900 border border-slate-600 text-white rounded-lg px-2 py-1 text-center text-xs focus:outline-none focus:border-amber-500">
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" min="0" value="${item.fa}" oninput="actualizarDato(${index}, 'fa', this.value)" 
+                                class="w-16 bg-slate-900 border border-slate-600 text-white rounded-lg px-2 py-1 text-center text-xs focus:outline-none focus:border-amber-500">
+                        </td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-mono">${htmlFr}</td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-mono">${htmlFR}</td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-semibold">${htmlFA}</td>
+                        <td class="px-2 py-2 text-center text-indigo-300 font-semibold">${htmlXfi}</td>
+                        <td class="px-2 py-2 text-center text-emerald-300 font-semibold">${htmlC7}</td>
+                        <td class="px-2 py-2 text-center">
+                            <button onclick="eliminarFila(${index})" class="text-rose-400 hover:text-rose-300 p-1.5 transition rounded-lg hover:bg-rose-950/40">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (conCalculos) {
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center">1.0000</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">${calc.datosOrdenadosX.reduce((acc, d) => acc + d.x * d.fa, 0).toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">${calc.sumaCuadratica.toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                    </tr>
+                `;
+            } else {
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center" colspan="6">Presiona "Cargar tabla" para generar el ejercicio</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function renderizarResultadosMedio() {
+            let calc = obtenerDatosCalculados();
+
+            let tendenciaItems = [
+                { label: "Media (x̄)", val: calc.media, key: "media", format: (v) => v % 1 === 0 ? v : v.toFixed(2) },
+                { label: "Mediana (Me)", val: calc.mediana, key: "mediana", format: (v) => v % 1 === 0 ? v : v.toFixed(2) },
+                { label: "Moda (Mo)", val: calc.modas, key: "moda", format: (v) => v }
+            ];
+            let htmlTendencia = '';
+            tendenciaItems.forEach((item, idx) => {
+                respuestasCorrectasCache[`tend-${item.key}`] = item.val;
+                let formattedVal = item.format(item.val);
+                if (puzzleConfig.tendenciaReveal === idx) {
+                    htmlTendencia += `
+                        <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-emerald-400 font-semibold">(Sistema)</span></span>
+                            <span class="text-sm font-bold text-emerald-400">${formattedVal}</span>
+                        </div>
+                    `;
+                } else {
+                    htmlTendencia += `
+                        <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-amber-400 font-semibold">(Tu turno)</span></span>
+                            <input type="text" id="input-tend-${item.key}" placeholder="?" class="w-24 bg-slate-900 border border-amber-600 text-amber-300 rounded-lg px-2 py-1 text-center text-xs focus:outline-none focus:border-amber-400">
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('container-tendencia').innerHTML = htmlTendencia;
+
+            let dispersionItems = [
+                { label: "Rango", val: calc.rango, key: "rango", format: (v) => v },
+                { label: "Varianza (s²)", val: calc.varianza, key: "varianza", format: (v) => v.toFixed(4) },
+                { label: "Desvío Estándar (s)", val: calc.desvio, key: "desvio", format: (v) => v.toFixed(4) },
+                { label: "Coef. de Variación (CV)", val: calc.cv, key: "cv", format: (v) => v.toFixed(2) }
+            ];
+            let htmlDispersion = '';
+            dispersionItems.forEach((item, idx) => {
+                respuestasCorrectasCache[`disp-${item.key}`] = item.val;
+                let formattedVal = item.key === 'cv' ? item.format(item.val) + '%' : item.format(item.val);
+                if (puzzleConfig.dispersionReveal.includes(idx)) {
+                    htmlDispersion += `
+                        <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-emerald-400 font-semibold">(Sistema)</span></span>
+                            <span class="text-sm font-bold text-emerald-400">${formattedVal}</span>
+                        </div>
+                    `;
+                } else {
+                    htmlDispersion += `
+                        <div class="flex justify-between items-center bg-slate-700/20 p-2.5 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-amber-400 font-semibold">(Tu turno)</span></span>
+                            <input type="text" id="input-disp-${item.key}" placeholder="?" class="w-24 bg-slate-900 border border-amber-600 text-amber-300 rounded-lg px-2 py-1 text-center text-xs focus:outline-none focus:border-amber-400">
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('container-dispersion').innerHTML = htmlDispersion;
+
+            let boxItems = [
+                { label: "MIN", val: calc.min, key: "min", format: (v) => v },
+                { label: "Q1", val: calc.q1, key: "q1", format: (v) => v % 1 === 0 ? v : v.toFixed(2) },
+                { label: "Q2 (Me)", val: calc.q2, key: "q2", format: (v) => v % 1 === 0 ? v : v.toFixed(2) },
+                { label: "Q3", val: calc.q3, key: "q3", format: (v) => v % 1 === 0 ? v : v.toFixed(2) },
+                { label: "MAX", val: calc.max, key: "max", format: (v) => v },
+                { label: "RIQ", val: calc.riq, key: "riq", format: (v) => v % 1 === 0 ? v : v.toFixed(2) },
+                { label: "LI", val: calc.li, key: "li", format: (v) => v % 1 === 0 ? v : v.toFixed(2) },
+                { label: "LS", val: calc.ls, key: "ls", format: (v) => v % 1 === 0 ? v : v.toFixed(2) }
+            ];
+            let htmlBox = '';
+            boxItems.forEach((item, idx) => {
+                respuestasCorrectasCache[`box-${item.key}`] = item.val;
+                let formattedVal = item.format(item.val);
+                if (puzzleConfig.boxplotReveal.includes(idx)) {
+                    htmlBox += `
+                        <div class="bg-slate-700/40 p-2 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-emerald-400 block font-semibold">${item.label} (Sistema)</span>
+                            <span class="text-sm font-bold text-emerald-400">${formattedVal}</span>
+                        </div>
+                    `;
+                } else {
+                    htmlBox += `
+                        <div class="bg-slate-700/40 p-2 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-amber-400 block font-semibold">${item.label} (Tu turno)</span>
+                            <input type="text" id="input-box-${item.key}" placeholder="?" class="w-16 bg-slate-900 border border-amber-600 text-amber-300 rounded px-1 py-1 text-center text-xs mt-1 focus:outline-none focus:border-amber-400">
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('container-boxplot-inputs').innerHTML = htmlBox;
+        }
+
+        function ejecutarHistograma() {
+            let datosOrd = [...datos].sort((a, b) => a.x - b.x);
+            let labels = datosOrd.map(d => d.x);
+            let valoresFa = datosOrd.map(d => d.fa);
+
+            const ctx = document.getElementById('chartHistograma').getContext('2d');
+            if (chartHistInstance) { chartHistInstance.destroy(); }
+
+            Chart.register(ChartDataLabels);
+
+            chartHistInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Frecuencia Absoluta (fa)',
+                            data: valoresFa,
+                            backgroundColor: 'rgba(99, 102, 241, 0.65)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1,
+                            barPercentage: 1.0,
+                            categoryPercentage: 1.0
+                        },
+                        {
+                            type: 'line',
+                            label: 'Polígono de Frecuencias',
+                            data: valoresFa,
+                            borderColor: 'rgba(249, 115, 22, 1)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: 'rgba(249, 115, 22, 1)',
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } },
+                        datalabels: {
+                            color: '#ffffff',
+                            anchor: 'center',
+                            align: 'center',
+                            font: { weight: 'bold', size: 11 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function ejecutarCajaBigotesGrafico() {
+            let calc = obtenerDatosCalculados();
+            renderizarSVGBoxplot(calc.min, calc.q1, calc.q2, calc.q3, calc.max);
+        }
+
+        function renderizarSVGBoxplot(min, q1, q2, q3, max) {
+            const container = document.getElementById('svg-boxplot-container');
+            let minVal = Math.min(min, q1);
+            let maxVal = Math.max(max, q3);
+            let rangoVal = maxVal - minVal || 1;
+
+            function escalaX(val) {
+                return 50 + ((val - minVal) / rangoVal) * 400;
+            }
+
+            let xMin = escalaX(min);
+            let xQ1 = escalaX(q1);
+            let xMed = escalaX(q2);
+            let xQ3 = escalaX(q3);
+            let xMax = escalaX(max);
+
+            let svgHTML = `
+                <svg viewBox="0 0 500 110" class="w-full h-24">
+                    <line x1="40" y1="70" x2="460" y2="70" stroke="#475569" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="${xMin}" y1="45" x2="${xMin}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="${xMin}" y1="60" x2="${xQ1}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    <rect x="${xQ1}" y="35" width="${Math.max(2, xQ3 - xQ1)}" height="50" fill="rgba(99, 102, 241, 0.3)" stroke="#6366f1" stroke-width="2.5" rx="4"/>
+                    <line x1="${xMed}" y1="35" x2="${xMed}" y2="85" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="${xQ3}" y1="60" x2="${xMax}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    <line x1="${xMax}" y1="45" x2="${xMax}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <text x="${xMin}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${min}</text>
+                    <text x="${xQ1}" y="22" fill="#818cf8" font-size="10" text-anchor="middle" font-weight="600">Q1: ${q1.toFixed(1)}</text>
+                    <text x="${xMed}" y="100" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="700">Me: ${q2.toFixed(1)}</text>
+                    <text x="${xQ3}" y="22" fill="#818cf8" font-size="10" text-anchor="middle" font-weight="600">Q3: ${q3.toFixed(1)}</text>
+                    <text x="${xMax}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${max}</text>
+                </svg>
+            `;
+            container.innerHTML = svgHTML;
+        }
+
+        // --- SISTEMA DE AUTOEVALUACIÓN INTELIGENTE CON TOLERANCIA DECIMAL Y NOTA ARGENTINA ---
+        function evaluarCoincidencia(valUserStr, valCorrect, tolerancia = 0.08) {
+            if (!valUserStr && valUserStr !== 0) return false;
+            let cleanStr = String(valUserStr).replace(',', '.').replace('%', '').trim();
+            let numUser = parseFloat(cleanStr);
+            let numCorrect = parseFloat(valCorrect);
+
+            if (!isNaN(numUser) && !isNaN(numCorrect)) {
+                return Math.abs(numUser - numCorrect) <= tolerancia;
+            }
+            // Comparación de texto (ej. Moda múltiple)
+            return cleanStr.toLowerCase() === String(valCorrect).toLowerCase();
+        }
+
+        function ejecutarAutoevaluacion() {
+            let totalInputs = 0;
+            let correctos = 0;
+
+            // 1. Tabla
+            for (let index = 0; index < datos.length; index++) {
+                for (let col = 0; col < 5; col++) {
+                    if (puzzleConfig.tableBlanks[`${index}-${col}`]) {
+                        totalInputs++;
+                        let inp = document.getElementById(`input-t-${index}-${col}`);
+                        if (inp) {
+                            if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`t-${index}-${col}`], 0.05)) {
+                                correctos++;
+                                inp.classList.remove('border-amber-600', 'bg-rose-950/40', 'text-rose-300');
+                                inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                            } else {
+                                inp.classList.remove('border-amber-600', 'border-emerald-500');
+                                inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 2. Tendencia Central
+            let tendenciaKeys = ['media', 'mediana', 'moda'];
+            tendenciaKeys.forEach((key, idx) => {
+                if (puzzleConfig.tendenciaReveal !== idx) {
+                    totalInputs++;
+                    let inp = document.getElementById(`input-tend-${key}`);
+                    if (inp) {
+                        if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`tend-${key}`], 0.08)) {
+                            correctos++;
+                            inp.classList.remove('border-amber-600', 'bg-rose-950/40', 'text-rose-300');
+                            inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                        } else {
+                            inp.classList.remove('border-amber-600', 'border-emerald-500');
+                            inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                        }
+                    }
+                }
+            });
+
+            // 3. Dispersión
+            let dispKeys = ['rango', 'varianza', 'desvio', 'cv'];
+            dispKeys.forEach((key, idx) => {
+                if (!puzzleConfig.dispersionReveal.includes(idx)) {
+                    totalInputs++;
+                    let inp = document.getElementById(`input-disp-${key}`);
+                    if (inp) {
+                        if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`disp-${key}`], 0.1)) {
+                            correctos++;
+                            inp.classList.remove('border-amber-600', 'bg-rose-950/40', 'text-rose-300');
+                            inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                        } else {
+                            inp.classList.remove('border-amber-600', 'border-emerald-500');
+                            inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                        }
+                    }
+                }
+            });
+
+            // 4. Boxplot
+            let boxKeys = ['min', 'q1', 'q2', 'q3', 'max', 'riq', 'li', 'ls'];
+            boxKeys.forEach((key, idx) => {
+                if (!puzzleConfig.boxplotReveal.includes(idx)) {
+                    totalInputs++;
+                    let inp = document.getElementById(`input-box-${key}`);
+                    if (inp) {
+                        if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`box-${key}`], 0.1)) {
+                            correctos++;
+                            inp.classList.remove('border-amber-600', 'bg-rose-950/40', 'text-rose-300');
+                            inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                        } else {
+                            inp.classList.remove('border-amber-600', 'border-emerald-500');
+                            inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                        }
+                    }
+                }
+            });
+
+            if (totalInputs === 0) {
+                mostrarError("Primero haz clic en 'Cargar tabla' para generar los campos del ejercicio.");
+                return;
+            }
+
+            let porcentaje = (correctos / totalInputs) * 100;
+            let nota;
+            if (porcentaje >= 60) {
+                nota = 4 + ((porcentaje - 60) / 40) * 6;
+            } else {
+                nota = 1 + (porcentaje / 60) * 3;
+            }
+            nota = Math.min(10, Math.max(1, Math.round(nota * 10) / 10));
+
+            // Mostrar Modal con Resultados
+            let modalIcono = document.getElementById('modal-icono');
+            let modalTitulo = document.getElementById('modal-titulo');
+            let modalContenido = document.getElementById('modal-contenido');
+
+            if (porcentaje === 100) {
+                modalIcono.innerHTML = '<i class="fa-solid fa-crown text-amber-400 text-5xl animate-bounce"></i>';
+                modalTitulo.textContent = "¡EXCELENTE TRABAJO!";
+                modalContenido.innerHTML = `
+                    <p class="text-emerald-400 font-bold text-base">¡Has alcanzado el 100% de aciertos!</p>
+                    <p class="text-2xl font-black text-amber-300 my-2">NOTA: 10 (DIEZ)</p>
+                    <p class="text-lg font-black text-indigo-300 tracking-wider uppercase bg-indigo-950/60 p-3 rounded-xl border border-indigo-700">¡¡ ¡GENIO! 👑✨</p>
+                `;
+            } else if (porcentaje >= 60) {
+                modalIcono.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i>';
+                modalTitulo.textContent = "¡APROBADO!";
+                modalContenido.innerHTML = `
+                    <p class="text-slate-300">Aciertos: <strong class="text-white">${correctos}</strong> de ${totalInputs} (${porcentaje.toFixed(1)}%)</p>
+                    <p class="text-xl font-black text-emerald-400 my-2">NOTA: ${nota}</p>
+                    <p class="text-xs text-slate-400">¡Muy bien! Has superado el umbral del 60% requerido.</p>
+                `;
+            } else {
+                modalIcono.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-400 text-4xl"></i>';
+                modalTitulo.textContent = "A REVISAR";
+                modalContenido.innerHTML = `
+                    <p class="text-slate-300">Aciertos: <strong class="text-white">${correctos}</strong> de ${totalInputs} (${porcentaje.toFixed(1)}%)</p>
+                    <p class="text-xl font-black text-rose-400 my-2">NOTA: ${nota}</p>
+                    <p class="text-xs text-rose-300">Estás por debajo del 60% (Nota 4). Revisa los campos en rojo e inténtalo de nuevo.</p>
+                `;
+            }
+
+            document.getElementById('modal-evaluacion').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+```
+eof
+
+---
+
+### Resumen de características generadas:
+1. **Botonera con Dos Botones Principales:** `Cargar tabla` a la izquierda y `AUTOEVALUACION` a la derecha.
+2. **Columnas de Frecuencia con Casillas Vacías:** Al cargar la tabla, al menos 2 celdas de las columnas 3 a la 7 quedan abiertas para que el estudiante las complete.
+3. **Selección Aleatoria Nivel Medio:**
+   - 1 medida de Tendencia Central automática, 2 manuales.
+   - 2 medidas de Dispersión automáticas, 2 manuales.
+   - 4 métricas de Caja y Bigotes automáticas, 4 manuales.
+4. **Autoevaluación Inteligente y Permisiva:** Tolerancia decimal configurable ($\pm 0.05$ a $\pm 0.1$) para evitar rechazos injustos por formato o redondeo menor.
+5. **Calificación Escolar Argentina:** Umbral de aprobación del 60% = Nota 4, escalando hasta 100% = Nota 10, con festejo especial de **GENIO** si se logra el puntaje perfecto.
+6. **Gráficos Integrados:** Histograma con datos de `fa` y polígono de frecuencias centrado, junto con el diagrama de caja y bigotes SVG dinámico.
