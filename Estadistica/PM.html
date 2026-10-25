@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Estadística - Nivel Fácil (Intervalos y PM)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { 
+            -moz-appearance: textfield; 
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-lg py-5 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-teal-600 p-3 rounded-2xl text-white shadow-lg shadow-teal-500/30">
+                    <i class="fa-solid fa-calculator text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Estadística Descriptiva • Intervalos (Nivel Fácil)</h1>
+                    <p class="text-xs text-teal-400 font-medium uppercase tracking-wider">Modo Automático • Botonera Modular</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="cargarEjemplo()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3.5 py-2 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Cargar Ejemplo
+                </button>
+                <button onclick="reiniciarTabla()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-2 border border-slate-600">
+                    <i class="fa-solid fa-rotate-right"></i> Limpiar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+        
+        <!-- Sección 1: Tabla de Frecuencias por Intervalos -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <div>
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table text-teal-400"></i> Tabla de Frecuencias (Datos Agrupados)
+                    </h2>
+                    <p class="text-xs text-slate-400">Ingresa libremente <strong class="text-teal-300">Lim. Inf (Li)</strong>, <strong class="text-teal-300">Lim. Sup (Ls)</strong> y <strong class="text-teal-300">fi</strong>.</p>
+                </div>
+                <button onclick="agregarFila()" class="bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition shadow-md shadow-teal-600/20 flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Agregar Intervalo
+                </button>
+            </div>
+
+            <!-- Tabla Interactiva -->
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-700/70 text-slate-200 uppercase text-[10px] tracking-wider border-b border-slate-600">
+                        <tr>
+                            <th class="px-3 py-3 text-center">Intervalo X</th>
+                            <th class="px-3 py-3 text-center">Lim. Inf </th>
+                            <th class="px-3 py-3 text-center">Lim. Sup </th>
+                            <th class="px-3 py-3 text-center">fi </th>
+                            <th class="px-3 py-3 text-center">Fa (Acum.)</th>
+                            <th class="px-3 py-3 text-center">fr (%)</th>
+                            <th class="px-3 py-3 text-center">FRA (%)</th>
+                            <th class="px-3 py-3 text-center">PM</th>
+                            <th class="px-3 py-3 text-center">PM · fi</th>
+                            <th class="px-3 py-3 text-center">(PM - x̄)² · fi</th>
+                            <th class="px-3 py-3 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo" class="divide-y divide-slate-700/50 bg-slate-800/40">
+                        <!-- Generado por JS -->
+                    </tbody>
+                    <tfoot id="tabla-pie" class="bg-slate-700/40 font-semibold text-white border-t border-slate-600">
+                        <!-- Generado por JS -->
+                    </tfoot>
+                </table>
+            </div>
+
+            <div id="mensaje-error" class="hidden mt-3 p-3 bg-rose-900/40 border border-rose-700 text-rose-300 text-xs rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span id="texto-error">Por favor completa valores válidos.</span>
+            </div>
+        </div>
+
+        <!-- Sección 2: Panel de Botones Modulares -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+            <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-gears text-teal-400"></i> Panel de Ejecución Modular
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                <button onclick="ejecutarCalcularColumnas()" class="bg-teal-600 hover:bg-teal-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-teal-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-table-cells text-sm"></i>
+                    <span>1. Calcular Columnas</span>
+                </button>
+                <button onclick="ejecutarTendenciaCentral()" class="bg-teal-600 hover:bg-teal-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-teal-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-bullseye text-sm"></i>
+                    <span>2. Tendencia Central (PM)</span>
+                </button>
+                <button onclick="ejecutarDispersion()" class="bg-teal-600 hover:bg-teal-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-teal-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-chart-pie text-sm"></i>
+                    <span>3. Dispersión y CV</span>
+                </button>
+                <button onclick="ejecutarHistograma()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-chart-column text-sm"></i>
+                    <span>4. Generar Histograma</span>
+                </button>
+                <button onclick="ejecutarCajaBigotes()" class="bg-amber-600 hover:bg-amber-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-amber-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-box-archive text-sm"></i>
+                    <span>5. Caja y Bigotes & Métricas</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección 3: Resultados de Análisis -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <!-- Tendencia Central Result -->
+            <div id="card-tendencia" class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl opacity-60 transition-opacity">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-bullseye text-teal-400"></i> Medidas de Tendencia Central
+                </h3>
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Media (<span class="italic">x̄</span>)</span>
+                        <span id="res-media" class="text-sm font-bold text-teal-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Mediana (<span class="italic">Me</span>)</span>
+                        <span id="res-mediana" class="text-sm font-bold text-teal-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Moda (<span class="italic">Mo</span>)</span>
+                        <span id="res-moda" class="text-sm font-bold text-teal-400">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispersión Result -->
+            <div id="card-dispersion" class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl opacity-60 transition-opacity">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-pie text-teal-400"></i> Medidas de Dispersión
+                </h3>
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Rango (Max - Min)</span>
+                        <span id="res-rango" class="text-sm font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Varianza (<span class="italic">s²</span>) [n-1]</span>
+                        <span id="res-varianza" class="text-sm font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Desvío Estándar (<span class="italic">s</span>) [n-1]</span>
+                        <span id="res-desvio" class="text-sm font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Coef. de Variación (<span class="italic">CV</span>)</span>
+                        <span id="res-cv" class="text-sm font-bold text-amber-400">-</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sección 4: Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            
+            <!-- Histograma con Polígono -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-column text-emerald-400"></i> Histograma y Polígono de Frecuencias
+                </h3>
+                <div class="relative flex-grow flex items-center justify-center min-h-[260px]">
+                    <canvas id="chartHistograma"></canvas>
+                </div>
+            </div>
+
+            <!-- Diagrama de Caja y Bigotes (Base PM) -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                        <i class="fa-solid fa-box-archive text-amber-400"></i> Diagrama de Caja y Bigotes [Base PM]
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">MIN</span>
+                            <span id="box-min" class="text-sm font-bold text-white">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">Q1</span>
+                            <span id="box-q1" class="text-sm font-bold text-teal-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">Q2 (Me)</span>
+                            <span id="box-q2" class="text-sm font-bold text-teal-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">Q3</span>
+                            <span id="box-q3" class="text-sm font-bold text-teal-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">MAX</span>
+                            <span id="box-max" class="text-sm font-bold text-white">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">RIQ</span>
+                            <span id="box-riq" class="text-sm font-bold text-emerald-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">LI</span>
+                            <span id="box-li" class="text-sm font-bold text-amber-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">LS</span>
+                            <span id="box-ls" class="text-sm font-bold text-amber-300">-</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Contenedor SVG Boxplot -->
+                <div id="svg-boxplot-container" class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 flex items-center justify-center min-h-[130px] overflow-x-auto">
+                    <span class="text-xs text-slate-500 italic">Haz clic en "Caja y Bigotes" para generar el diagrama gráfico</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800/60 border-t border-slate-700/60 py-3 px-6 text-center text-xs text-slate-400 mt-auto">
+        Calculadora Estadística Interactiva • Intervalos Nivel Fácil &copy; 2026
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let datosIntervalos = [
+            { li: 20, ls: 25, fi: 23 },
+            { li: 25, ls: 30, fi: 38 },
+            { li: 30, ls: 35, fi: 51 },
+            { li: 35, ls: 40, fi: 55 },
+            { li: 40, ls: 45, fi: 53 },
+            { li: 45, ls: 50, fi: 50 },
+            { li: 50, ls: 55, fi: 48 },
+            { li: 55, ls: 60, fi: 39 },
+            { li: 60, ls: 65, fi: 31 },
+            { li: 65, ls: 70, fi: 26 },
+            { li: 70, ls: 75, fi: 20 },
+            { li: 75, ls: 80, fi: 16 }
+        ];
+
+        let chartHistInstance = null;
+        let calculadoColumnas = false;
+
+        window.onload = function() {
+            renderizarTablaBase(false);
+        };
+
+        function cargarEjemplo() {
+            datosIntervalos = [
+                { li: 20, ls: 25, fi: 23 },
+                { li: 25, ls: 30, fi: 38 },
+                { li: 30, ls: 35, fi: 51 },
+                { li: 35, ls: 40, fi: 55 },
+                { li: 40, ls: 45, fi: 53 },
+                { li: 45, ls: 50, fi: 50 },
+                { li: 50, ls: 55, fi: 48 },
+                { li: 55, ls: 60, fi: 39 },
+                { li: 60, ls: 65, fi: 31 },
+                { li: 65, ls: 70, fi: 26 },
+                { li: 70, ls: 75, fi: 20 },
+                { li: 75, ls: 80, fi: 16 }
+            ];
+            calculadoColumnas = false;
+            renderizarTablaBase(false);
+            resetearResultadosVisuales();
+        }
+
+        function reiniciarTabla() {
+            datosIntervalos = [{ li: 0, ls: 10, fi: 5 }];
+            calculadoColumnas = false;
+            renderizarTablaBase(false);
+            resetearResultadosVisuales();
+        }
+
+        function agregarFila() {
+            let ultimoLs = datosIntervalos.length > 0 ? datosIntervalos[datosIntervalos.length - 1].ls : 0;
+            datosIntervalos.push({ li: ultimoLs, ls: ultimoLs + 5, fi: 10 });
+            calculadoColumnas = false;
+            renderizarTablaBase(false);
+        }
+
+        function eliminarFila(index) {
+            if (datosIntervalos.length <= 1) {
+                mostrarError("Debe haber al menos un intervalo.");
+                return;
+            }
+            datosIntervalos.splice(index, 1);
+            calculadoColumnas = false;
+            renderizarTablaBase(false);
+        }
+
+        function actualizarDato(index, campo, valor) {
+            const val = parseFloat(valor);
+            datosIntervalos[index][campo] = isNaN(val) ? 0 : val;
+            calculadoColumnas = false;
+        }
+
+        function mostrarError(mensaje) {
+            const errBox = document.getElementById('mensaje-error');
+            const txtErr = document.getElementById('texto-error');
+            txtErr.textContent = mensaje;
+            errBox.classList.remove('hidden');
+            setTimeout(() => { errBox.classList.add('hidden'); }, 4000);
+        }
+
+        function resetearResultadosVisuales() {
+            document.getElementById('res-media').textContent = '-';
+            document.getElementById('res-mediana').textContent = '-';
+            document.getElementById('res-moda').textContent = '-';
+            document.getElementById('res-rango').textContent = '-';
+            document.getElementById('res-varianza').textContent = '-';
+            document.getElementById('res-desvio').textContent = '-';
+            document.getElementById('res-cv').textContent = '-';
+            
+            document.getElementById('card-tendencia').classList.add('opacity-60');
+            document.getElementById('card-dispersion').classList.add('opacity-60');
+
+            document.getElementById('box-min').textContent = '-';
+            document.getElementById('box-q1').textContent = '-';
+            document.getElementById('box-q2').textContent = '-';
+            document.getElementById('box-q3').textContent = '-';
+            document.getElementById('box-max').textContent = '-';
+            document.getElementById('box-riq').textContent = '-';
+            document.getElementById('box-li').textContent = '-';
+            document.getElementById('box-ls').textContent = '-';
+            document.getElementById('svg-boxplot-container').innerHTML = '<span class="text-xs text-slate-500 italic">Haz clic en "Caja y Bigotes" para generar el diagrama gráfico</span>';
+
+            if (chartHistInstance) { chartHistInstance.destroy(); chartHistInstance = null; }
+        }
+
+        function obtenerDatosCalculadosAux() {
+            let N = 0;
+            datosIntervalos.forEach(d => N += d.fi);
+            
+            let Fa_acc = 0;
+            let sumaPmFi = 0;
+            let filasCalculadas = [];
+            let arrPmExpandido = [];
+
+            datosIntervalos.forEach(d => {
+                Fa_acc += d.fi;
+                let pm = (d.li + d.ls) / 2;
+                let pmFi = pm * d.fi;
+                sumaPmFi += pmFi;
+                filasCalculadas.push({ ...d, pm, pmFi, Fa: Fa_acc });
+                for (let i = 0; i < d.fi; i++) {
+                    arrPmExpandido.push(pm);
+                }
+            });
+
+            let media = N > 0 ? sumaPmFi / N : 0;
+            let sumaCuadratica = 0;
+            filasCalculadas.forEach(f => {
+                sumaCuadratica += Math.pow(f.pm - media, 2) * f.fi;
+            });
+
+            // Muestra n-1
+            let varianza = N > 1 ? sumaCuadratica / (N - 1) : 0;
+            let desvio = Math.sqrt(varianza);
+            let cv = media > 0 ? (desvio / media) * 100 : 0;
+
+            let minLi = datosIntervalos.length > 0 ? datosIntervalos[0].li : 0;
+            let maxLs = datosIntervalos.length > 0 ? datosIntervalos[datosIntervalos.length - 1].ls : 0;
+            let rango = maxLs - minLi;
+
+            let mediana = calcularPercentil(arrPmExpandido, 0.50);
+            let min = arrPmExpandido.length > 0 ? arrPmExpandido[0] : 0;
+            let max = arrPmExpandido.length > 0 ? arrPmExpandido[arrPmExpandido.length - 1] : 0;
+            let q1 = calcularPercentil(arrPmExpandido, 0.25);
+            let q3 = calcularPercentil(arrPmExpandido, 0.75);
+            let riq = q3 - q1;
+            let li = q1 - 1.5 * riq;
+            let ls = q3 + 1.5 * riq;
+
+            let maxFi = -1;
+            let modaVal = 0;
+            datosIntervalos.forEach(d => {
+                if (d.fi > maxFi) {
+                    maxFi = d.fi;
+                    modaVal = (d.li + d.ls) / 2;
+                }
+            });
+
+            return {
+                N, media, sumaCuadratica, filasCalculadas, arrPmExpandido,
+                mediana, moda: modaVal, rango, varianza, desvio, cv,
+                min, q1, q2: mediana, q3, max, riq, li, ls
+            };
+        }
+
+        function calcularPercentil(arr, p) {
+            if (arr.length === 0) return 0;
+            let index = p * (arr.length - 1);
+            let lower = Math.floor(index);
+            let upper = Math.ceil(index);
+            let weight = index - lower;
+            if (upper >= arr.length) return arr[arr.length - 1];
+            return arr[lower] * (1 - weight) + arr[upper] * weight;
+        }
+
+        function renderizarTablaBase(conCalculos = false) {
+            const tbody = document.getElementById('tabla-cuerpo');
+            const tfoot = document.getElementById('tabla-pie');
+            tbody.innerHTML = '';
+
+            let calc = obtenerDatosCalculadosAux();
+            let N = calc.N;
+
+            datosIntervalos.forEach((item, index) => {
+                let fCalculada = calc.filasCalculadas[index];
+                let frPct = N > 0 ? (item.fi / N) * 100 : 0;
+                let FRPct = N > 0 ? (fCalculada.Fa / N) * 100 : 0;
+                let col10Val = Math.pow(fCalculada.pm - calc.media, 2) * item.fi;
+
+                let faVal = conCalculos ? fCalculada.Fa : '-';
+                let frVal = conCalculos ? frPct.toFixed(2) : '-';
+                let frAcVal = conCalculos ? FRPct.toFixed(2) : '-';
+                let pmVal = conCalculos ? fCalculada.pm.toFixed(2) : '-';
+                let pmFiVal = conCalculos ? fCalculada.pmFi.toFixed(2) : '-';
+                let c10Val = conCalculos ? col10Val.toFixed(2) : '-';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-700/20 transition">
+                        <td class="px-2 py-2 text-center font-mono text-teal-300">[${item.li}-${item.ls})</td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" value="${item.li}" oninput="actualizarDato(${index}, 'li', this.value)" 
+                                class="w-14 bg-slate-900 border border-slate-600 text-white rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-teal-500">
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" value="${item.ls}" oninput="actualizarDato(${index}, 'ls', this.value)" 
+                                class="w-14 bg-slate-900 border border-slate-600 text-white rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-teal-500">
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" min="0" value="${item.fi}" oninput="actualizarDato(${index}, 'fi', this.value)" 
+                                class="w-14 bg-slate-900 border border-slate-600 text-white rounded px-1 py-1 text-center text-xs focus:outline-none focus:border-teal-500">
+                        </td>
+                        <td class="px-2 py-2 text-center font-semibold">${faVal}</td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-mono">${frVal}</td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-mono">${frAcVal}</td>
+                        <td class="px-2 py-2 text-center text-teal-300 font-semibold">${pmVal}</td>
+                        <td class="px-2 py-2 text-center text-indigo-300 font-semibold">${pmFiVal}</td>
+                        <td class="px-2 py-2 text-center text-emerald-300 font-semibold">${c10Val}</td>
+                        <td class="px-2 py-2 text-center">
+                            <button onclick="eliminarFila(${index})" class="text-rose-400 hover:text-rose-300 p-1.5 transition rounded-lg hover:bg-rose-950/40">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (conCalculos) {
+                let sumaPmFi = calc.filasCalculadas.reduce((acc, f) => acc + f.pmFi, 0);
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center" colspan="3">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">100%</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">${sumaPmFi.toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">${calc.sumaCuadratica.toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                    </tr>
+                `;
+            } else {
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center" colspan="3">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center" colspan="7">Haz clic en "1. Calcular Columnas" para rellenar totales</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // --- BOTONES MODULARES ---
+
+        function ejecutarCalcularColumnas() {
+            calculadoColumnas = true;
+            renderizarTablaBase(true);
+        }
+
+        function ejecutarTendenciaCentral() {
+            let calc = obtenerDatosCalculadosAux();
+            if (calc.N === 0) {
+                mostrarError("No hay datos suficientes.");
+                return;
+            }
+
+            document.getElementById('res-media').textContent = calc.media.toFixed(2);
+            document.getElementById('res-mediana').textContent = calc.mediana.toFixed(2);
+            document.getElementById('res-moda').textContent = calc.moda.toFixed(2);
+            document.getElementById('card-tendencia').classList.remove('opacity-60');
+        }
+
+        function ejecutarDispersion() {
+            let calc = obtenerDatosCalculadosAux();
+            if (calc.N <= 1) {
+                mostrarError("Se requieren al menos 2 elementos para calcular dispersión.");
+                return;
+            }
+
+            document.getElementById('res-rango').textContent = calc.rango;
+            document.getElementById('res-varianza').textContent = calc.varianza.toFixed(4);
+            document.getElementById('res-desvio').textContent = calc.desvio.toFixed(4);
+            document.getElementById('res-cv').textContent = calc.cv.toFixed(2) + '%';
+            document.getElementById('card-dispersion').classList.remove('opacity-60');
+        }
+
+        function ejecutarHistograma() {
+            if (datosIntervalos.length === 0) {
+                mostrarError("No hay datos para graficar.");
+                return;
+            }
+
+            let labels = datosIntervalos.map(d => `[${d.li}-${d.ls})`);
+            let valoresFi = datosIntervalos.map(d => d.fi);
+
+            const ctx = document.getElementById('chartHistograma').getContext('2d');
+            if (chartHistInstance) { chartHistInstance.destroy(); }
+
+            Chart.register(ChartDataLabels);
+
+            chartHistInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Frecuencia Absoluta (fi)',
+                            data: valoresFi,
+                            backgroundColor: 'rgba(20, 184, 166, 0.65)',
+                            borderColor: 'rgba(13, 148, 136, 1)',
+                            borderWidth: 1,
+                            barPercentage: 1.0,
+                            categoryPercentage: 1.0
+                        },
+                        {
+                            type: 'line',
+                            label: 'Polígono de Frecuencias',
+                            data: valoresFi,
+                            borderColor: 'rgba(249, 115, 22, 1)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: 'rgba(249, 115, 22, 1)',
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } },
+                        datalabels: {
+                            color: '#ffffff',
+                            anchor: 'center',
+                            align: 'center',
+                            font: { weight: 'bold', size: 10 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function ejecutarCajaBigotes() {
+            let calc = obtenerDatosCalculadosAux();
+            if (calc.N === 0) {
+                mostrarError("No hay datos suficientes.");
+                return;
+            }
+
+            document.getElementById('box-min').textContent = calc.min;
+            document.getElementById('box-q1').textContent = calc.q1.toFixed(2);
+            document.getElementById('box-q2').textContent = calc.q2.toFixed(2);
+            document.getElementById('box-q3').textContent = calc.q3.toFixed(2);
+            document.getElementById('box-max').textContent = calc.max;
+            document.getElementById('box-riq').textContent = calc.riq.toFixed(2);
+            document.getElementById('box-li').textContent = calc.li.toFixed(2);
+            document.getElementById('box-ls').textContent = calc.ls.toFixed(2);
+
+            renderizarSVGBoxplot(calc.min, calc.q1, calc.q2, calc.q3, calc.max);
+        }
+
+        function renderizarSVGBoxplot(min, q1, q2, q3, max) {
+            const container = document.getElementById('svg-boxplot-container');
+            let minVal = Math.min(min, q1);
+            let maxVal = Math.max(max, q3);
+            let rangoVal = maxVal - minVal || 1;
+
+            function escalaX(val) {
+                return 50 + ((val - minVal) / rangoVal) * 400;
+            }
+
+            let xMin = escalaX(min);
+            let xQ1 = escalaX(q1);
+            let xMed = escalaX(q2);
+            let xQ3 = escalaX(q3);
+            let xMax = escalaX(max);
+
+            let svgHTML = `
+                <svg viewBox="0 0 500 110" class="w-full h-24">
+                    <line x1="40" y1="70" x2="460" y2="70" stroke="#475569" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="${xMin}" y1="45" x2="${xMin}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="${xMin}" y1="60" x2="${xQ1}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    <rect x="${xQ1}" y="35" width="${Math.max(2, xQ3 - xQ1)}" height="50" fill="rgba(20, 184, 166, 0.3)" stroke="#14b8a6" stroke-width="2.5" rx="4"/>
+                    <line x1="${xMed}" y1="35" x2="${xMed}" y2="85" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="${xQ3}" y1="60" x2="${xMax}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    <line x1="${xMax}" y1="45" x2="${xMax}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <text x="${xMin}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${min}</text>
+                    <text x="${xQ1}" y="22" fill="#2dd4bf" font-size="10" text-anchor="middle" font-weight="600">Q1: ${q1.toFixed(1)}</text>
+                    <text x="${xMed}" y="100" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="700">Me: ${q2.toFixed(1)}</text>
+                    <text x="${xQ3}" y="22" fill="#2dd4bf" font-size="10" text-anchor="middle" font-weight="600">Q3: ${q3.toFixed(1)}</text>
+                    <text x="${xMax}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${max}</text>
+                </svg>
+            `;
+            container.innerHTML = svgHTML;
+        }
+    </script>
+</body>
+</html>
