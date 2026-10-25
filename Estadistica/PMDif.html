@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Estadística - Datos Agrupados por Intervalos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { 
+            -moz-appearance: textfield; 
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-lg py-5 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-teal-600 p-3 rounded-2xl text-white shadow-lg shadow-teal-500/30">
+                    <i class="fa-solid fa-chart-line text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Estadística Descriptiva • Datos Agrupados por Intervalos</h1>
+                    <p class="text-xs text-teal-400 font-medium uppercase tracking-wider">Nivel Avanzado Base PM</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="cargarEjemploIntervalos()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3.5 py-2 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Cargar Ejemplo
+                </button>
+                <button onclick="reiniciarTodo()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-2 border border-slate-600">
+                    <i class="fa-solid fa-rotate-right"></i> Limpiar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+        
+        <!-- Botonera Principal -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-teal-400"></i> Panel de Control del Ejercicio por Intervalos
+                </h3>
+                <p class="text-xs text-slate-400">Ingresa <strong class="text-teal-300">Lim. Inf (Li)</strong>, <strong class="text-teal-300">Lim. Sup (Ls)</strong> y <strong class="text-teal-300">fi</strong>, presiona <span class="text-indigo-300 font-semibold">Cargar tabla</span> y al finalizar evalúate con <span class="text-emerald-300 font-semibold">AUTOEVALUACION</span>.</p>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="ejecutarCargarTabla()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-3 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-table-cells"></i> Cargar tabla
+                </button>
+                <button onclick="ejecutarAutoevaluacion()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-square-check text-sm"></i> AUTOEVALUACION
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal de Resultado / Calificación -->
+        <div id="modal-evaluacion" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center space-y-4">
+                <div id="modal-icono" class="text-4xl text-teal-400"><i class="fa-solid fa-award"></i></div>
+                <h3 id="modal-titulo" class="text-lg font-bold text-white">Resultado de Autoevaluación</h3>
+                <div id="modal-contenido" class="text-sm text-slate-300 space-y-2">
+                    <!-- Dinámico -->
+                </div>
+                <button onclick="cerrarModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition w-full">
+                    Continuar Practicando
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección 1: Tabla de Frecuencias por Intervalos -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <div>
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table text-teal-400"></i> Tabla de Frecuencias con Clases [Li - Ls)
+                    </h2>
+                    <p class="text-xs text-slate-400">Carga los datos LIM INF, LIM SUP y su Fi.</p>
+                </div>
+                <button onclick="agregarFilaIntervalo()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition border border-slate-600 flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Agregar Intervalo
+                </button>
+            </div>
+
+            <!-- Tabla de Intervalos -->
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-700/70 text-slate-200 uppercase text-[10px] tracking-wider border-b border-slate-600">
+                        <tr>
+                            <th class="px-3 py-3 text-center">Intervalo X</th>
+                            <th class="px-3 py-3 text-center">Lim. Inf</th>
+                            <th class="px-3 py-3 text-center">Lim. Sup</th>
+                            <th class="px-3 py-3 text-center">fi</th>
+                            <th class="px-3 py-3 text-center">Fa</th>
+                            <th class="px-3 py-3 text-center">fr (%)</th>
+                            <th class="px-3 py-3 text-center">FR (%)</th>
+                            <th class="px-3 py-3 text-center">PM</th>
+                            <th class="px-3 py-3 text-center">PM · fi</th>
+                            <th class="px-3 py-3 text-center">(PM - x̄)² · fi</th>
+                            <th class="px-3 py-3 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo" class="divide-y divide-slate-700/50 bg-slate-800/40">
+                        <!-- Generado por JS -->
+                    </tbody>
+                    <tfoot id="tabla-pie" class="bg-slate-700/40 font-semibold text-white border-t border-slate-600">
+                        <!-- Generado por JS -->
+                    </tfoot>
+                </table>
+            </div>
+            <div id="mensaje-error" class="hidden mt-3 p-3 bg-rose-900/40 border border-rose-700 text-rose-300 text-xs rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span id="texto-error">Por favor completa valores válidos.</span>
+            </div>
+        </div>
+
+        <!-- Sección 2: Resultados de Análisis -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <!-- Tendencia Central -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-bullseye text-teal-400"></i> Medidas de Tendencia Central
+                </h3>
+                <div id="container-tendencia" class="space-y-2.5 text-xs">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+            <!-- Dispersión (Muestra n-1) -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-pie text-teal-400"></i> Medidas de Dispersión
+                </h3>
+                <div id="container-dispersion" class="space-y-2.5 text-xs">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sección 3: Gráficos y Caja de Bigotes basados en PM -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            
+            <!-- Histograma -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-column text-teal-400"></i> Histograma y Polígono de Frecuencias
+                </h3>
+                <div class="relative flex-grow flex items-center justify-center min-h-[260px]">
+                    <canvas id="chartHistograma"></canvas>
+                </div>
+            </div>
+
+            <!-- Caja y Bigotes basado en PM -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                        <i class="fa-solid fa-box-archive text-teal-400"></i> Caja y Bigotes [PM]
+                    </h3>
+                    <div id="container-boxplot-inputs" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
+                        <!-- Dinámico -->
+                    </div>
+                </div>
+                <!-- Contenedor SVG Boxplot -->
+                <div id="svg-boxplot-container" class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 flex items-center justify-center min-h-[130px] overflow-x-auto">
+                    <span class="text-xs text-slate-500 italic">Presiona "Cargar tabla" para generar el diagrama gráfico</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800/60 border-t border-slate-700/60 py-3 px-6 text-center text-xs text-slate-400 mt-auto">
+        Calculadora Estadística • Datos Agrupados &copy; 2026
+    </footer>
+
+    <!-- Script JavaScript -->
+    <script>
+        let datosIntervalos = [
+            { li: 20, ls: 25, fi: 23 },
+            { li: 25, ls: 30, fi: 38 },
+            { li: 30, ls: 35, fi: 51 },
+            { li: 35, ls: 40, fi: 55 },
+            { li: 40, ls: 45, fi: 53 },
+            { li: 45, ls: 50, fi: 50 },
+            { li: 50, ls: 55, fi: 48 },
+            { li: 55, ls: 60, fi: 39 },
+            { li: 60, ls: 65, fi: 31 },
+            { li: 65, ls: 70, fi: 26 },
+            { li: 70, ls: 75, fi: 20 },
+            { li: 75, ls: 80, fi: 16 }
+        ];
+
+        let chartHistInstance = null;
+        let puzzleConfig = {
+            tableBlanks: {},
+            tendenciaReveal: 0,
+            dispersionReveal: [],
+            boxplotReveal: []
+        };
+        let respuestasCorrectasCache = {};
+
+        window.onload = function() {
+            renderizarTablaBase(false);
+            renderizarPanelesVacios();
+        };
+
+        function cargarEjemploIntervalos() {
+            datosIntervalos = [
+                { li: 20, ls: 25, fi: 23 },
+                { li: 25, ls: 30, fi: 38 },
+                { li: 30, ls: 35, fi: 51 },
+                { li: 35, ls: 40, fi: 55 },
+                { li: 40, ls: 45, fi: 53 },
+                { li: 45, ls: 50, fi: 50 },
+                { li: 50, ls: 55, fi: 48 },
+                { li: 55, ls: 60, fi: 39 },
+                { li: 60, ls: 65, fi: 31 },
+                { li: 65, ls: 70, fi: 26 },
+                { li: 70, ls: 75, fi: 20 },
+                { li: 75, ls: 80, fi: 16 }
+            ];
+            ejecutarCargarTabla();
+        }
+
+        function reiniciarTodo() {
+            datosIntervalos = [{ li: 0, ls: 10, fi: 5 }];
+            renderizarTablaBase(false);
+            renderizarPanelesVacios();
+            if (chartHistInstance) { chartHistInstance.destroy(); chartHistInstance = null; }
+            document.getElementById('svg-boxplot-container').innerHTML = '<span class="text-xs text-slate-500 italic">Presiona "Cargar tabla" para generar el diagrama gráfico</span>';
+        }
+
+        function agregarFilaIntervalo() {
+            let ultimoLs = datosIntervalos.length > 0 ? datosIntervalos[datosIntervalos.length - 1].ls : 0;
+            datosIntervalos.push({ li: ultimoLs, ls: ultimoLs + 5, fi: 10 });
+            renderizarTablaBase(false);
+        }
+
+        function eliminarFila(index) {
+            if (datosIntervalos.length <= 1) {
+                mostrarError("Debe haber al menos un intervalo.");
+                return;
+            }
+            datosIntervalos.splice(index, 1);
+            renderizarTablaBase(false);
+        }
+
+        function actualizarDato(index, campo, valor) {
+            const val = parseFloat(valor);
+            datosIntervalos[index][campo] = isNaN(val) ? 0 : val;
+        }
+
+        function mostrarError(mensaje) {
+            const errBox = document.getElementById('mensaje-error');
+            const txtErr = document.getElementById('texto-error');
+            txtErr.textContent = mensaje;
+            errBox.classList.remove('hidden');
+            setTimeout(() => { errBox.classList.add('hidden'); }, 4000);
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-evaluacion').classList.add('hidden');
+        }
+
+        function renderizarPanelesVacios() {
+            document.getElementById('container-tendencia').innerHTML = `
+                <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700"><span class="text-slate-300">Media (x̄)</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700"><span class="text-slate-300">Mediana (Me)</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700"><span class="text-slate-300">Moda (Mo)</span><span class="text-slate-500">-</span></div>
+            `;
+            document.getElementById('container-dispersion').innerHTML = `
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Rango</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Varianza [n-1]</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Desvío [n-1]</span><span class="text-slate-500">-</span></div>
+                <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700"><span class="text-slate-300">Coef. Variación (CV)</span><span class="text-slate-500">-</span></div>
+            `;
+            const boxNames = ['MIN', 'Q1', 'Q2 (Me)', 'Q3', 'MAX', 'RIQ', 'LI', 'LS'];
+            let boxHtml = '';
+            boxNames.forEach((name) => {
+                boxHtml += `
+                    <div class="bg-slate-700/40 p-2 rounded-xl border border-slate-700 text-center">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">${name}</span>
+                        <span class="text-sm font-bold text-slate-500">-</span>
+                    </div>
+                `;
+            });
+            document.getElementById('container-boxplot-inputs').innerHTML = boxHtml;
+        }
+
+        function ejecutarCargarTabla() {
+            if (datosIntervalos.length === 0) {
+                mostrarError("Ingresa intervalos en la tabla.");
+                return;
+            }
+
+            puzzleConfig.tableBlanks = {};
+            for (let col = 0; col < 6; col++) { // 6 columnas calculadas: Fa, fr, FR, PM, PM*fi, col10
+                let filasElegidas = new Set();
+                while (filasElegidas.size < Math.min(datosIntervalos.length, 2)) {
+                    let fIdx = Math.floor(Math.random() * datosIntervalos.length);
+                    filasElegidas.add(fIdx);
+                }
+                filasElegidas.forEach(fIdx => {
+                    puzzleConfig.tableBlanks[`${fIdx}-${col}`] = true;
+                });
+            }
+
+            puzzleConfig.tendenciaReveal = Math.floor(Math.random() * 3);
+            let dispArr = [0, 1, 2, 3];
+            shuffleArray(dispArr);
+            puzzleConfig.dispersionReveal = [dispArr[0], dispArr[1]];
+
+            let boxArr = [0, 1, 2, 3, 4, 5, 6, 7];
+            shuffleArray(boxArr);
+            puzzleConfig.boxplotReveal = [boxArr[0], boxArr[1], boxArr[2], boxArr[3]];
+
+            renderizarTablaBase(true);
+            renderizarResultados();
+            ejecutarHistograma();
+            ejecutarCajaBigotesGrafico();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function obtenerDatosCalculados() {
+            let N = 0;
+            datosIntervalos.forEach(d => N += d.fi);
+            
+            let Fa_acc = 0;
+            let sumaPmFi = 0;
+            let filasCalculadas = [];
+            let arrPmExpandido = [];
+
+            datosIntervalos.forEach(d => {
+                Fa_acc += d.fi;
+                let pm = (d.li + d.ls) / 2;
+                let pmFi = pm * d.fi;
+                sumaPmFi += pmFi;
+                filasCalculadas.push({ ...d, pm, pmFi, Fa: Fa_acc });
+                for (let i = 0; i < d.fi; i++) {
+                    arrPmExpandido.push(pm);
+                }
+            });
+
+            let media = N > 0 ? sumaPmFi / N : 0;
+            let sumaCuadratica = 0;
+            filasCalculadas.forEach(f => {
+                sumaCuadratica += Math.pow(f.pm - media, 2) * f.fi;
+            });
+
+            // Muestra n-1 para varianza
+            let varianza = N > 1 ? sumaCuadratica / (N - 1) : 0;
+            let desvio = Math.sqrt(varianza);
+            let cv = media > 0 ? (desvio / media) * 100 : 0;
+
+            let minLi = datosIntervalos.length > 0 ? datosIntervalos[0].li : 0;
+            let maxLs = datosIntervalos.length > 0 ? datosIntervalos[datosIntervalos.length - 1].ls : 0;
+            let rango = maxLs - minLi;
+
+            let mediana = calcularPercentil(arrPmExpandido, 0.50);
+            let min = arrPmExpandido.length > 0 ? arrPmExpandido[0] : 0;
+            let max = arrPmExpandido.length > 0 ? arrPmExpandido[arrPmExpandido.length - 1] : 0;
+            let q1 = calcularPercentil(arrPmExpandido, 0.25);
+            let q3 = calcularPercentil(arrPmExpandido, 0.75);
+            let riq = q3 - q1;
+            let li = q1 - 1.5 * riq;
+            let ls = q3 + 1.5 * riq;
+
+            // Moda basada en PM con mayor fi
+            let maxFi = -1;
+            let modaVal = 0;
+            datosIntervalos.forEach(d => {
+                if (d.fi > maxFi) {
+                    maxFi = d.fi;
+                    modaVal = (d.li + d.ls) / 2;
+                }
+            });
+
+            return {
+                N, media, sumaCuadratica, filasCalculadas, arrPmExpandido,
+                mediana, moda: modaVal, rango, varianza, desvio, cv,
+                min, q1, q2: mediana, q3, max, riq, li, ls
+            };
+        }
+
+        function calcularPercentil(arr, p) {
+            if (arr.length === 0) return 0;
+            let index = p * (arr.length - 1);
+            let lower = Math.floor(index);
+            let upper = Math.ceil(index);
+            let weight = index - lower;
+            if (upper >= arr.length) return arr[arr.length - 1];
+            return arr[lower] * (1 - weight) + arr[upper] * weight;
+        }
+
+        function renderizarTablaBase(conCalculos) {
+            const tbody = document.getElementById('tabla-cuerpo');
+            const tfoot = document.getElementById('tabla-pie');
+            tbody.innerHTML = '';
+
+            let calc = obtenerDatosCalculados();
+            let N = calc.N;
+
+            datosIntervalos.forEach((item, index) => {
+                let fCalculada = calc.filasCalculadas[index];
+                let frPct = N > 0 ? (item.fi / N) * 100 : 0;
+                let FRPct = N > 0 ? (fCalculada.Fa / N) * 100 : 0;
+                let col10Val = Math.pow(fCalculada.pm - calc.media, 2) * item.fi;
+
+                respuestasCorrectasCache[`t-${index}-0`] = fCalculada.Fa;
+                respuestasCorrectasCache[`t-${index}-1`] = frPct;
+                respuestasCorrectasCache[`t-${index}-2`] = FRPct;
+                respuestasCorrectasCache[`t-${index}-3`] = fCalculada.pm;
+                respuestasCorrectasCache[`t-${index}-4`] = fCalculada.pmFi;
+                respuestasCorrectasCache[`t-${index}-5`] = col10Val;
+
+                let htmlFa = (conCalculos && puzzleConfig.tableBlanks[`${index}-0`]) ? `<input type="number" id="input-t-${index}-0" placeholder="?" class="w-16 bg-slate-900 border border-teal-600 text-teal-300 rounded px-1 py-1 text-center text-xs">` : (conCalculos ? fCalculada.Fa : '-');
+                let htmlFr = (conCalculos && puzzleConfig.tableBlanks[`${index}-1`]) ? `<input type="number" step="any" id="input-t-${index}-1" placeholder="?" class="w-16 bg-slate-900 border border-teal-600 text-teal-300 rounded px-1 py-1 text-center text-xs">` : (conCalculos ? frPct.toFixed(2) : '-');
+                let htmlFR = (conCalculos && puzzleConfig.tableBlanks[`${index}-2`]) ? `<input type="number" step="any" id="input-t-${index}-2" placeholder="?" class="w-16 bg-slate-900 border border-teal-600 text-teal-300 rounded px-1 py-1 text-center text-xs">` : (conCalculos ? FRPct.toFixed(2) : '-');
+                let htmlPm = (conCalculos && puzzleConfig.tableBlanks[`${index}-3`]) ? `<input type="number" step="any" id="input-t-${index}-3" placeholder="?" class="w-16 bg-slate-900 border border-teal-600 text-teal-300 rounded px-1 py-1 text-center text-xs">` : (conCalculos ? fCalculada.pm.toFixed(2) : '-');
+                let htmlPmFi = (conCalculos && puzzleConfig.tableBlanks[`${index}-4`]) ? `<input type="number" step="any" id="input-t-${index}-4" placeholder="?" class="w-16 bg-slate-900 border border-teal-600 text-teal-300 rounded px-1 py-1 text-center text-xs">` : (conCalculos ? fCalculada.pmFi.toFixed(2) : '-');
+                let htmlCol10 = (conCalculos && puzzleConfig.tableBlanks[`${index}-5`]) ? `<input type="number" step="any" id="input-t-${index}-5" placeholder="?" class="w-20 bg-slate-900 border border-teal-600 text-teal-300 rounded px-1 py-1 text-center text-xs">` : (conCalculos ? col10Val.toFixed(2) : '-');
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-700/20 transition">
+                        <td class="px-2 py-2 text-center font-mono text-teal-300">[${item.li}-${item.ls})</td>
+                        <td class="px-2 py-2 text-center"><input type="number" value="${item.li}" oninput="actualizarDato(${index}, 'li', this.value)" class="w-14 bg-slate-900 border border-slate-600 text-white rounded px-1 py-1 text-center text-xs"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" value="${item.ls}" oninput="actualizarDato(${index}, 'ls', this.value)" class="w-14 bg-slate-900 border border-slate-600 text-white rounded px-1 py-1 text-center text-xs"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" value="${item.fi}" oninput="actualizarDato(${index}, 'fi', this.value)" class="w-14 bg-slate-900 border border-slate-600 text-white rounded px-1 py-1 text-center text-xs"></td>
+                        <td class="px-2 py-2 text-center font-semibold">${htmlFa}</td>
+                        <td class="px-2 py-2 text-center font-mono">${htmlFr}</td>
+                        <td class="px-2 py-2 text-center font-mono">${htmlFR}</td>
+                        <td class="px-2 py-2 text-center text-teal-300 font-semibold">${htmlPm}</td>
+                        <td class="px-2 py-2 text-center text-indigo-300 font-semibold">${htmlPmFi}</td>
+                        <td class="px-2 py-2 text-center text-emerald-300 font-semibold">${htmlCol10}</td>
+                        <td class="px-2 py-2 text-center">
+                            <button onclick="eliminarFila(${index})" class="text-rose-400 hover:text-rose-300 p-1.5 transition rounded-lg hover:bg-rose-950/40">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (conCalculos) {
+                let sumaTotalPmFi = calc.filasCalculadas.reduce((acc, f) => acc + f.pmFi, 0);
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center" colspan="3">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">100%</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">${sumaTotalPmFi.toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">${calc.sumaCuadratica.toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                    </tr>
+                `;
+            } else {
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center" colspan="3">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center" colspan="7">Presiona "Cargar tabla" para iniciar práctica</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function renderizarResultados() {
+            let calc = obtenerDatosCalculados();
+
+            let tendenciaItems = [
+                { label: "Media (x̄)", val: calc.media, key: "media", format: (v) => v.toFixed(2) },
+                { label: "Mediana (Me)", val: calc.mediana, key: "mediana", format: (v) => v.toFixed(2) },
+                { label: "Moda (Mo)", val: calc.moda, key: "moda", format: (v) => v.toFixed(2) }
+            ];
+            let htmlTendencia = '';
+            tendenciaItems.forEach((item, idx) => {
+                respuestasCorrectasCache[`tend-${item.key}`] = item.val;
+                let formattedVal = item.format(item.val);
+                if (puzzleConfig.tendenciaReveal === idx) {
+                    htmlTendencia += `
+                        <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-teal-400 font-semibold">(Sistema)</span></span>
+                            <span class="text-sm font-bold text-teal-400">${formattedVal}</span>
+                        </div>
+                    `;
+                } else {
+                    htmlTendencia += `
+                        <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-teal-400 font-semibold">(Tu turno)</span></span>
+                            <input type="text" id="input-tend-${item.key}" placeholder="?" class="w-24 bg-slate-900 border border-teal-600 text-teal-300 rounded-lg px-2 py-1 text-center text-xs focus:outline-none">
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('container-tendencia').innerHTML = htmlTendencia;
+
+            let dispersionItems = [
+                { label: "Rango", val: calc.rango, key: "rango", format: (v) => v },
+                { label: "Varianza [n-1]", val: calc.varianza, key: "varianza", format: (v) => v.toFixed(4) },
+                { label: "Desvío [n-1]", val: calc.desvio, key: "desvio", format: (v) => v.toFixed(4) },
+                { label: "Coef. Variación (CV)", val: calc.cv, key: "cv", format: (v) => v.toFixed(2) }
+            ];
+            let htmlDispersion = '';
+            dispersionItems.forEach((item, idx) => {
+                respuestasCorrectasCache[`disp-${item.key}`] = item.val;
+                let formattedVal = item.key === 'cv' ? item.format(item.val) + '%' : item.format(item.val);
+                if (puzzleConfig.dispersionReveal.includes(idx)) {
+                    htmlDispersion += `
+                        <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-teal-400 font-semibold">(Sistema)</span></span>
+                            <span class="text-sm font-bold text-teal-400">${formattedVal}</span>
+                        </div>
+                    `;
+                } else {
+                    htmlDispersion += `
+                        <div class="flex justify-between items-center bg-slate-700/20 p-2.5 rounded-xl border border-slate-700">
+                            <span class="text-slate-300 font-medium">${item.label} <span class="text-[10px] text-teal-400 font-semibold">(Tu turno)</span></span>
+                            <input type="text" id="input-disp-${item.key}" placeholder="?" class="w-24 bg-slate-900 border border-teal-600 text-teal-300 rounded-lg px-2 py-1 text-center text-xs focus:outline-none">
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('container-dispersion').innerHTML = htmlDispersion;
+
+            let boxItems = [
+                { label: "MIN", val: calc.min, key: "min", format: (v) => v },
+                { label: "Q1", val: calc.q1, key: "q1", format: (v) => v.toFixed(2) },
+                { label: "Q2 (Me)", val: calc.q2, key: "q2", format: (v) => v.toFixed(2) },
+                { label: "Q3", val: calc.q3, key: "q3", format: (v) => v.toFixed(2) },
+                { label: "MAX", val: calc.max, key: "max", format: (v) => v },
+                { label: "RIQ", val: calc.riq, key: "riq", format: (v) => v.toFixed(2) },
+                { label: "LI", val: calc.li, key: "li", format: (v) => v.toFixed(2) },
+                { label: "LS", val: calc.ls, key: "ls", format: (v) => v.toFixed(2) }
+            ];
+            let htmlBox = '';
+            boxItems.forEach((item, idx) => {
+                respuestasCorrectasCache[`box-${item.key}`] = item.val;
+                let formattedVal = item.format(item.val);
+                if (puzzleConfig.boxplotReveal.includes(idx)) {
+                    htmlBox += `
+                        <div class="bg-slate-700/40 p-2 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-teal-400 block font-semibold">${item.label} (Sistema)</span>
+                            <span class="text-sm font-bold text-teal-400">${formattedVal}</span>
+                        </div>
+                    `;
+                } else {
+                    htmlBox += `
+                        <div class="bg-slate-700/40 p-2 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-teal-400 block font-semibold">${item.label} (Tu turno)</span>
+                            <input type="text" id="input-box-${item.key}" placeholder="?" class="w-16 bg-slate-900 border border-teal-600 text-teal-300 rounded px-1 py-1 text-center text-xs mt-1 focus:outline-none">
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('container-boxplot-inputs').innerHTML = htmlBox;
+        }
+
+        function ejecutarHistograma() {
+            let labels = datosIntervalos.map(d => `[${d.li}-${d.ls})`);
+            let valoresFi = datosIntervalos.map(d => d.fi);
+
+            const ctx = document.getElementById('chartHistograma').getContext('2d');
+            if (chartHistInstance) { chartHistInstance.destroy(); }
+
+            Chart.register(ChartDataLabels);
+
+            chartHistInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Frecuencia Absoluta (fi)',
+                            data: valoresFi,
+                            backgroundColor: 'rgba(20, 184, 166, 0.65)',
+                            borderColor: 'rgba(13, 148, 136, 1)',
+                            borderWidth: 1,
+                            barPercentage: 1.0,
+                            categoryPercentage: 1.0
+                        },
+                        {
+                            type: 'line',
+                            label: 'Polígono de Frecuencias',
+                            data: valoresFi,
+                            borderColor: 'rgba(249, 115, 22, 1)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: 'rgba(249, 115, 22, 1)',
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } },
+                        datalabels: {
+                            color: '#ffffff',
+                            anchor: 'center',
+                            align: 'center',
+                            font: { weight: 'bold', size: 10 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function ejecutarCajaBigotesGrafico() {
+            let calc = obtenerDatosCalculados();
+            renderizarSVGBoxplot(calc.min, calc.q1, calc.q2, calc.q3, calc.max);
+        }
+
+        function renderizarSVGBoxplot(min, q1, q2, q3, max) {
+            const container = document.getElementById('svg-boxplot-container');
+            let minVal = Math.min(min, q1);
+            let maxVal = Math.max(max, q3);
+            let rangoVal = maxVal - minVal || 1;
+
+            function escalaX(val) {
+                return 50 + ((val - minVal) / rangoVal) * 400;
+            }
+
+            let xMin = escalaX(min);
+            let xQ1 = escalaX(q1);
+            let xMed = escalaX(q2);
+            let xQ3 = escalaX(q3);
+            let xMax = escalaX(max);
+
+            let svgHTML = `
+                <svg viewBox="0 0 500 110" class="w-full h-24">
+                    <line x1="40" y1="70" x2="460" y2="70" stroke="#475569" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="${xMin}" y1="45" x2="${xMin}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="${xMin}" y1="60" x2="${xQ1}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    <rect x="${xQ1}" y="35" width="${Math.max(2, xQ3 - xQ1)}" height="50" fill="rgba(20, 184, 166, 0.3)" stroke="#14b8a6" stroke-width="2.5" rx="4"/>
+                    <line x1="${xMed}" y1="35" x2="${xMed}" y2="85" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="${xQ3}" y1="60" x2="${xMax}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    <line x1="${xMax}" y1="45" x2="${xMax}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <text x="${xMin}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${min}</text>
+                    <text x="${xQ1}" y="22" fill="#2dd4bf" font-size="10" text-anchor="middle" font-weight="600">Q1: ${q1.toFixed(1)}</text>
+                    <text x="${xMed}" y="100" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="700">Me: ${q2.toFixed(1)}</text>
+                    <text x="${xQ3}" y="22" fill="#2dd4bf" font-size="10" text-anchor="middle" font-weight="600">Q3: ${q3.toFixed(1)}</text>
+                    <text x="${xMax}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${max}</text>
+                </svg>
+            `;
+            container.innerHTML = svgHTML;
+        }
+
+        function evaluarCoincidencia(valUserStr, valCorrect, tolerancia = 0.08) {
+            if (!valUserStr && valUserStr !== 0) return false;
+            let cleanStr = String(valUserStr).replace(',', '.').replace('%', '').trim();
+            let numUser = parseFloat(cleanStr);
+            let numCorrect = parseFloat(valCorrect);
+
+            if (!isNaN(numUser) && !isNaN(numCorrect)) {
+                return Math.abs(numUser - numCorrect) <= tolerancia;
+            }
+            return cleanStr.toLowerCase() === String(valCorrect).toLowerCase();
+        }
+
+        function ejecutarAutoevaluacion() {
+            let totalInputs = 0;
+            let correctos = 0;
+
+            // 1. Tabla
+            for (let index = 0; index < datosIntervalos.length; index++) {
+                for (let col = 0; col < 6; col++) {
+                    if (puzzleConfig.tableBlanks[`${index}-${col}`]) {
+                        totalInputs++;
+                        let inp = document.getElementById(`input-t-${index}-${col}`);
+                        if (inp) {
+                            if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`t-${index}-${col}`], 0.1)) {
+                                correctos++;
+                                inp.classList.remove('border-teal-600', 'bg-rose-950/40', 'text-rose-300');
+                                inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                            } else {
+                                inp.classList.remove('border-teal-600', 'border-emerald-500');
+                                inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 2. Tendencia Central
+            let tendenciaKeys = ['media', 'mediana', 'moda'];
+            tendenciaKeys.forEach((key, idx) => {
+                if (puzzleConfig.tendenciaReveal !== idx) {
+                    totalInputs++;
+                    let inp = document.getElementById(`input-tend-${key}`);
+                    if (inp) {
+                        if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`tend-${key}`], 0.15)) {
+                            correctos++;
+                            inp.classList.remove('border-teal-600', 'bg-rose-950/40', 'text-rose-300');
+                            inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                        } else {
+                            inp.classList.remove('border-teal-600', 'border-emerald-500');
+                            inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                        }
+                    }
+                }
+            });
+
+            // 3. Dispersión
+            let dispKeys = ['rango', 'varianza', 'desvio', 'cv'];
+            dispKeys.forEach((key, idx) => {
+                if (!puzzleConfig.dispersionReveal.includes(idx)) {
+                    totalInputs++;
+                    let inp = document.getElementById(`input-disp-${key}`);
+                    if (inp) {
+                        if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`disp-${key}`], 0.2)) {
+                            correctos++;
+                            inp.classList.remove('border-teal-600', 'bg-rose-950/40', 'text-rose-300');
+                            inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                        } else {
+                            inp.classList.remove('border-teal-600', 'border-emerald-500');
+                            inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                        }
+                    }
+                }
+            });
+
+            // 4. Boxplot
+            let boxKeys = ['min', 'q1', 'q2', 'q3', 'max', 'riq', 'li', 'ls'];
+            boxKeys.forEach((key, idx) => {
+                if (!puzzleConfig.boxplotReveal.includes(idx)) {
+                    totalInputs++;
+                    let inp = document.getElementById(`input-box-${key}`);
+                    if (inp) {
+                        if (evaluarCoincidencia(inp.value, respuestasCorrectasCache[`box-${key}`], 0.2)) {
+                            correctos++;
+                            inp.classList.remove('border-teal-600', 'bg-rose-950/40', 'text-rose-300');
+                            inp.classList.add('border-emerald-500', 'bg-emerald-950/40', 'text-emerald-300');
+                        } else {
+                            inp.classList.remove('border-teal-600', 'border-emerald-500');
+                            inp.classList.add('border-rose-500', 'bg-rose-950/40', 'text-rose-300');
+                        }
+                    }
+                }
+            });
+
+            if (totalInputs === 0) {
+                mostrarError("Primero haz clic en 'Cargar tabla' para generar los campos del ejercicio.");
+                return;
+            }
+
+            let porcentaje = (correctos / totalInputs) * 100;
+            let nota;
+            if (porcentaje >= 60) {
+                nota = 4 + ((porcentaje - 60) / 40) * 6;
+            } else {
+                nota = 1 + (porcentaje / 60) * 3;
+            }
+            nota = Math.min(10, Math.max(1, Math.round(nota * 10) / 10));
+
+            let modalIcono = document.getElementById('modal-icono');
+            let modalTitulo = document.getElementById('modal-titulo');
+            let modalContenido = document.getElementById('modal-contenido');
+
+            if (porcentaje === 100) {
+                modalIcono.innerHTML = '<i class="fa-solid fa-crown text-teal-400 text-5xl animate-bounce"></i>';
+                modalTitulo.textContent = "¡EXCELENTE TRABAJO!";
+                modalContenido.innerHTML = `
+                    <p class="text-emerald-400 font-bold text-base">¡Has alcanzado el 100% de aciertos!</p>
+                    <p class="text-2xl font-black text-teal-300 my-2">NOTA: 10 (DIEZ)</p>
+                    <p class="text-lg font-black text-indigo-300 tracking-wider uppercase bg-indigo-950/60 p-3 rounded-xl border border-indigo-700">¡¡ ¡GENIO! 👑✨</p>
+                `;
+            } else if (porcentaje >= 60) {
+                modalIcono.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i>';
+                modalTitulo.textContent = "¡APROBADO!";
+                modalContenido.innerHTML = `
+                    <p class="text-slate-300">Aciertos: <strong class="text-white">${correctos}</strong> de ${totalInputs} (${porcentaje.toFixed(1)}%)</p>
+                    <p class="text-xl font-black text-emerald-400 my-2">NOTA: ${nota}</p>
+                    <p class="text-xs text-slate-400">¡Muy bien! Superaste el umbral del 60% requerido.</p>
+                `;
+            } else {
+                modalIcono.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-400 text-4xl"></i>';
+                modalTitulo.textContent = "A REVISAR";
+                modalContenido.innerHTML = `
+                    <p class="text-slate-300">Aciertos: <strong class="text-white">${correctos}</strong> de ${totalInputs} (${porcentaje.toFixed(1)}%)</p>
+                    <p class="text-xl font-black text-rose-400 my-2">NOTA: ${nota}</p>
+                    <p class="text-xs text-rose-300">Estás por debajo del 60% (Nota 4). Revisa los campos en rojo.</p>
+                `;
+            }
+
+            document.getElementById('modal-evaluacion').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
