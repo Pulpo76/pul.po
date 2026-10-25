@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Estadística Interactiva - Nivel Fácil</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Ocultar flechas (spinners) en inputs numéricos */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] { 
+            -moz-appearance: textfield; 
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-lg py-5 px-4 md:px-8">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-calculator text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Calculadora Estadística Interactiva</h1>
+                    <p class="text-xs text-indigo-400 font-medium uppercase tracking-wider">Nivel Fácil • Alta Precisión</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="cargarEjemplo()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3.5 py-2 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Cargar Ejemplo
+                </button>
+                <button onclick="reiniciarTabla()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-2 border border-slate-600">
+                    <i class="fa-solid fa-rotate-right"></i> Limpiar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-6 space-y-6">
+        
+        <!-- Sección 1: Tabla de Frecuencias -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <div>
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table text-indigo-400"></i> Tabla de Frecuencias
+                    </h2>
+                    <p class="text-xs text-slate-400">Escribe libremente en <strong class="text-indigo-300">X</strong> y <strong class="text-indigo-300">fa</strong> sin retrasos ni pérdida de foco.</p>
+                </div>
+                <button onclick="agregarFila()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Agregar Fila
+                </button>
+            </div>
+
+            <!-- Tabla de 7 Columnas -->
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-700/70 text-slate-200 uppercase text-[10px] tracking-wider border-b border-slate-600">
+                        <tr>
+                            <th class="px-3 py-3 text-center">1. X (Variable)</th>
+                            <th class="px-3 py-3 text-center">2. fa (Freq.)</th>
+                            <th class="px-3 py-3 text-center">3. fr (0 a 1)</th>
+                            <th class="px-3 py-3 text-center">4. FR (Acum. 0-1)</th>
+                            <th class="px-3 py-3 text-center">5. FA (Acum.)</th>
+                            <th class="px-3 py-3 text-center">6. X · fa</th>
+                            <th class="px-3 py-3 text-center">7. (X - x̄)² · fa</th>
+                            <th class="px-3 py-3 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo" class="divide-y divide-slate-700/50 bg-slate-800/40">
+                        <!-- Generado por JS -->
+                    </tbody>
+                    <tfoot id="tabla-pie" class="bg-slate-700/40 font-semibold text-white border-t border-slate-600">
+                        <!-- Generado por JS -->
+                    </tfoot>
+                </table>
+            </div>
+
+            <div id="mensaje-error" class="hidden mt-3 p-3 bg-rose-900/40 border border-rose-700 text-rose-300 text-xs rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span id="texto-error">Por favor completa valores válidos.</span>
+            </div>
+        </div>
+
+        <!-- Sección 2: Panel de Botones Modulares -->
+        <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+            <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-gears text-indigo-400"></i> Panel de Ejecución Modular
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                <button onclick="ejecutarCalcularColumnas()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-table-cells text-sm"></i>
+                    <span>1. Calcular Columnas (3 al 7)</span>
+                </button>
+                <button onclick="ejecutarTendenciaCentral()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-bullseye text-sm"></i>
+                    <span>2. Tendencia Central</span>
+                </button>
+                <button onclick="ejecutarDispersion()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-chart-pie text-sm"></i>
+                    <span>3. Dispersión y CV</span>
+                </button>
+                <button onclick="ejecutarHistograma()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-chart-column text-sm"></i>
+                    <span>4. Generar Histograma</span>
+                </button>
+                <button onclick="ejecutarCajaBigotes()" class="bg-amber-600 hover:bg-amber-500 text-white font-medium px-3 py-2.5 rounded-xl text-xs transition shadow-md shadow-amber-600/20 flex flex-col items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-box-archive text-sm"></i>
+                    <span>5. Caja y Bigotes & Métricas</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección 3: Resultados de Análisis -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <!-- Tendencia Central Result -->
+            <div id="card-tendencia" class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl opacity-60 transition-opacity">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-bullseye text-indigo-400"></i> Medidas de Tendencia Central
+                </h3>
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Media (<span class="italic">x̄</span>)</span>
+                        <span id="res-media" class="text-sm font-bold text-indigo-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Mediana (<span class="italic">Me</span>)</span>
+                        <span id="res-mediana" class="text-sm font-bold text-indigo-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Moda (<span class="italic">Mo</span>)</span>
+                        <span id="res-moda" class="text-sm font-bold text-indigo-400">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispersión Result -->
+            <div id="card-dispersion" class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl opacity-60 transition-opacity">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-pie text-indigo-400"></i> Medidas de Dispersión
+                </h3>
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Rango (Max - Min)</span>
+                        <span id="res-rango" class="text-sm font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Varianza (<span class="italic">s²</span>) [n-1]</span>
+                        <span id="res-varianza" class="text-sm font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Desvío Estándar (<span class="italic">s</span>)</span>
+                        <span id="res-desvio" class="text-sm font-bold text-emerald-400">-</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-700/30 p-2.5 rounded-xl border border-slate-700">
+                        <span class="text-slate-300 font-medium">Coef. de Variación (<span class="italic">CV</span>)</span>
+                        <span id="res-cv" class="text-sm font-bold text-amber-400">-</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sección 4: Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            
+            <!-- Histograma con Barras Pegadas y Polígono de Frecuencias -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col">
+                <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                    <i class="fa-solid fa-chart-column text-emerald-400"></i> Histograma y Polígono de Frecuencias
+                </h3>
+                <div class="relative flex-grow flex items-center justify-center min-h-[260px]">
+                    <canvas id="chartHistograma"></canvas>
+                </div>
+            </div>
+
+            <!-- Diagrama de Caja y Bigotes Preciso (SVG) -->
+            <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2.5">
+                        <i class="fa-solid fa-box-archive text-amber-400"></i> Diagrama de Caja y Bigotes
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">MIN</span>
+                            <span id="box-min" class="text-sm font-bold text-white">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">Q1</span>
+                            <span id="box-q1" class="text-sm font-bold text-indigo-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">Q2 (Me)</span>
+                            <span id="box-q2" class="text-sm font-bold text-indigo-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">Q3</span>
+                            <span id="box-q3" class="text-sm font-bold text-indigo-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">MAX</span>
+                            <span id="box-max" class="text-sm font-bold text-white">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">RIQ</span>
+                            <span id="box-riq" class="text-sm font-bold text-emerald-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">LI</span>
+                            <span id="box-li" class="text-sm font-bold text-amber-300">-</span>
+                        </div>
+                        <div class="bg-slate-700/40 p-2.5 rounded-xl border border-slate-700 text-center">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">LS</span>
+                            <span id="box-ls" class="text-sm font-bold text-amber-300">-</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Contenedor SVG Boxplot -->
+                <div id="svg-boxplot-container" class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 flex items-center justify-center min-h-[130px] overflow-x-auto">
+                    <span class="text-xs text-slate-500 italic">Haz clic en "Caja y Bigotes" para generar el diagrama gráfico</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800/60 border-t border-slate-700/60 py-3 px-6 text-center text-xs text-slate-400 mt-auto">
+        Calculadora Estadística Interactiva • Nivel Fácil &copy; 2026
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Estado inicial de los datos
+        let datos = [
+            { x: 4, fa: 1 },
+            { x: 5, fa: 2 },
+            { x: 6, fa: 3 },
+            { x: 7, fa: 4 },
+            { x: 8, fa: 3 },
+            { x: 9, fa: 1 },
+            { x: 11, fa: 1 }
+        ];
+
+        let calculadoColumnas = false;
+        let chartHistInstance = null;
+
+        window.onload = function() {
+            renderizarTablaBase();
+        };
+
+        function cargarEjemplo() {
+            datos = [
+                { x: 4, fa: 1 },
+                { x: 5, fa: 2 },
+                { x: 6, fa: 3 },
+                { x: 7, fa: 4 },
+                { x: 8, fa: 3 },
+                { x: 9, fa: 1 },
+                { x: 11, fa: 1 }
+            ];
+            calculadoColumnas = false;
+            renderizarTablaBase();
+            resetearResultadosVisuales();
+        }
+
+        function reiniciarTabla() {
+            datos = [{ x: 0, fa: 1 }];
+            calculadoColumnas = false;
+            renderizarTablaBase();
+            resetearResultadosVisuales();
+        }
+
+        function agregarFila() {
+            datos.push({ x: 0, fa: 1 });
+            calculadoColumnas = false;
+            renderizarTablaBase();
+        }
+
+        function eliminarFila(index) {
+            if (datos.length <= 1) {
+                mostrarError("Debe haber al menos una fila en la tabla.");
+                return;
+            }
+            datos.splice(index, 1);
+            calculadoColumnas = false;
+            renderizarTablaBase();
+        }
+
+        // Actualización directa sin re-renderizar tabla (elimina lag y pérdida de foco)
+        function actualizarDato(index, campo, valor) {
+            const val = parseFloat(valor);
+            datos[index][campo] = isNaN(val) ? 0 : val;
+            calculadoColumnas = false;
+        }
+
+        function mostrarError(mensaje) {
+            const errBox = document.getElementById('mensaje-error');
+            const txtErr = document.getElementById('texto-error');
+            txtErr.textContent = mensaje;
+            errBox.classList.remove('hidden');
+            setTimeout(() => {
+                errBox.classList.add('hidden');
+            }, 4000);
+        }
+
+        function resetearResultadosVisuales() {
+            document.getElementById('res-media').textContent = '-';
+            document.getElementById('res-mediana').textContent = '-';
+            document.getElementById('res-moda').textContent = '-';
+            document.getElementById('res-rango').textContent = '-';
+            document.getElementById('res-varianza').textContent = '-';
+            document.getElementById('res-desvio').textContent = '-';
+            document.getElementById('res-cv').textContent = '-';
+            
+            document.getElementById('card-tendencia').classList.add('opacity-60');
+            document.getElementById('card-dispersion').classList.add('opacity-60');
+
+            document.getElementById('box-min').textContent = '-';
+            document.getElementById('box-q1').textContent = '-';
+            document.getElementById('box-q2').textContent = '-';
+            document.getElementById('box-q3').textContent = '-';
+            document.getElementById('box-max').textContent = '-';
+            document.getElementById('box-riq').textContent = '-';
+            document.getElementById('box-li').textContent = '-';
+            document.getElementById('box-ls').textContent = '-';
+            document.getElementById('svg-boxplot-container').innerHTML = '<span class="text-xs text-slate-500 italic">Haz clic en "Caja y Bigotes" para generar el diagrama gráfico</span>';
+
+            if (chartHistInstance) { chartHistInstance.destroy(); chartHistInstance = null; }
+        }
+
+        // Renderizado inicial o estructural de la tabla con inputs nativos
+        function renderizarTablaBase(conCalculos = false) {
+            const tbody = document.getElementById('tabla-cuerpo');
+            const tfoot = document.getElementById('tabla-pie');
+            tbody.innerHTML = '';
+
+            let N = 0;
+            datos.forEach(row => {
+                N += (row.fa > 0 ? row.fa : 0);
+            });
+
+            let FA_acumulada = 0;
+            let sumaXfi = 0;
+            let datosIntermedios = [];
+
+            datos.forEach(row => {
+                FA_acumulada += row.fa;
+                let xfi = row.x * row.fa;
+                sumaXfi += xfi;
+                datosIntermedios.push({ ...row, FA: FA_acumulada, xfi });
+            });
+
+            let media = N > 0 ? sumaXfi / N : 0;
+            let sumaCuadratica = 0;
+            datosIntermedios.forEach(item => {
+                sumaCuadratica += Math.pow(item.x - media, 2) * item.fa;
+            });
+
+            datos.forEach((item, index) => {
+                let faVal = item.fa;
+                let FA_val = '-';
+                let fr_val = '-';
+                let FR_val = '-';
+                let xfi_val = '-';
+                let col7_val = '-';
+
+                if (conCalculos && N > 0) {
+                    let faAcc = 0;
+                    for(let i=0; i<=index; i++) faAcc += datos[i].fa;
+                    let frNum = faVal / N;
+                    let FRNum = faAcc / N;
+                    let xfiNum = item.x * faVal;
+                    let c7Num = Math.pow(item.x - media, 2) * faVal;
+
+                    FA_val = faAcc;
+                    fr_val = frNum.toFixed(4);
+                    FR_val = FRNum.toFixed(4);
+                    xfi_val = xfiNum.toFixed(2);
+                    col7_val = c7Num.toFixed(2);
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-700/20 transition">
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" value="${item.x}" oninput="actualizarDato(${index}, 'x', this.value)" 
+                                class="w-16 bg-slate-900 border border-slate-600 text-white rounded-lg px-2 py-1 text-center text-xs focus:outline-none focus:border-indigo-500">
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" min="0" value="${item.fa}" oninput="actualizarDato(${index}, 'fa', this.value)" 
+                                class="w-16 bg-slate-900 border border-slate-600 text-white rounded-lg px-2 py-1 text-center text-xs focus:outline-none focus:border-indigo-500">
+                        </td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-mono">${fr_val}</td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-mono">${FR_val}</td>
+                        <td class="px-2 py-2 text-center text-slate-300 font-semibold">${FA_val}</td>
+                        <td class="px-2 py-2 text-center text-indigo-300 font-semibold">${xfi_val}</td>
+                        <td class="px-2 py-2 text-center text-emerald-300 font-semibold">${col7_val}</td>
+                        <td class="px-2 py-2 text-center">
+                            <button onclick="eliminarFila(${index})" class="text-rose-400 hover:text-rose-300 p-1.5 transition rounded-lg hover:bg-rose-950/40">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (conCalculos) {
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center">1.0000</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                        <td class="px-3 py-2.5 text-center">${sumaXfi.toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">${sumaCuadratica.toFixed(2)}</td>
+                        <td class="px-3 py-2.5 text-center">-</td>
+                    </tr>
+                `;
+            } else {
+                tfoot.innerHTML = `
+                    <tr>
+                        <td class="px-3 py-2.5 text-center">Total (N)</td>
+                        <td class="px-3 py-2.5 text-center">${N}</td>
+                        <td class="px-3 py-2.5 text-center" colspan="6">Haz clic en "Calcular Columnas (3 al 7)" para rellenar totales</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // --- BOTONES MODULARES ---
+
+        function ejecutarCalcularColumnas() {
+            calculadoColumnas = true;
+            renderizarTablaBase(true);
+        }
+
+        function obtenerDatosCalculadosAux() {
+            let N = 0;
+            datos.forEach(d => N += d.fa);
+            let FA_acc = 0;
+            let sumaXfi = 0;
+            let arrExpandido = [];
+            let datosOrdenadosX = [...datos].sort((a, b) => a.x - b.x);
+
+            datosOrdenadosX.forEach(d => {
+                FA_acc += d.fa;
+                sumaXfi += d.x * d.fa;
+                for (let i = 0; i < d.fa; i++) {
+                    arrExpandido.push(d.x);
+                }
+            });
+
+            let media = N > 0 ? sumaXfi / N : 0;
+            let sumaCuadratica = 0;
+            datosOrdenadosX.forEach(d => {
+                sumaCuadratica += Math.pow(d.x - media, 2) * d.fa;
+            });
+
+            return { N, media, sumaCuadratica, arrExpandido, datosOrdenadosX };
+        }
+
+        function ejecutarTendenciaCentral() {
+            const { N, media, arrExpandido } = obtenerDatosCalculadosAux();
+            if (N === 0) {
+                mostrarError("No hay datos suficientes para calcular.");
+                return;
+            }
+
+            let mediana = 0;
+            let mid = Math.floor(arrExpandido.length / 2);
+            if (arrExpandido.length % 2 === 0) {
+                mediana = (arrExpandido[mid - 1] + arrExpandido[mid]) / 2;
+            } else {
+                mediana = arrExpandido[mid];
+            }
+
+            let frecuenciasMap = {};
+            datos.forEach(d => {
+                frecuenciasMap[d.x] = (frecuenciasMap[d.x] || 0) + d.fa;
+            });
+            let maxFa = -1;
+            let modas = [];
+            for (let x in frecuenciasMap) {
+                if (frecuenciasMap[x] > maxFa) {
+                    maxFa = frecuenciasMap[x];
+                    modas = [x];
+                } else if (frecuenciasMap[x] === maxFa) {
+                    modas.push(x);
+                }
+            }
+
+            document.getElementById('res-media').textContent = media.toFixed(2);
+            document.getElementById('res-mediana').textContent = mediana.toFixed(2);
+            document.getElementById('res-moda').textContent = modas.join(', ');
+            document.getElementById('card-tendencia').classList.remove('opacity-60');
+        }
+
+        function ejecutarDispersion() {
+            const { N, media, sumaCuadratica, datosOrdenadosX } = obtenerDatosCalculadosAux();
+            if (N <= 1) {
+                mostrarError("Se requieren al menos 2 elementos para calcular dispersión.");
+                return;
+            }
+
+            let minX = datosOrdenadosX[0].x;
+            let maxX = datosOrdenadosX[datosOrdenadosX.length - 1].x;
+            let rango = maxX - minX;
+
+            let varianza = sumaCuadratica / (N - 1);
+            let desvio = Math.sqrt(varianza);
+            let cv = media > 0 ? (desvio / media) * 100 : 0;
+
+            document.getElementById('res-rango').textContent = rango;
+            document.getElementById('res-varianza').textContent = varianza.toFixed(4);
+            document.getElementById('res-desvio').textContent = desvio.toFixed(4);
+            document.getElementById('res-cv').textContent = cv.toFixed(2) + '%';
+            document.getElementById('card-dispersion').classList.remove('opacity-60');
+        }
+
+        function ejecutarHistograma() {
+            if (datos.length === 0) {
+                mostrarError("No hay datos para graficar.");
+                return;
+            }
+
+            // Ordenamos por X para el histograma
+            let datosOrd = [...datos].sort((a, b) => a.x - b.x);
+            let labels = datosOrd.map(d => d.x);
+            let valoresFa = datosOrd.map(d => d.fa);
+
+            const ctx = document.getElementById('chartHistograma').getContext('2d');
+            if (chartHistInstance) {
+                chartHistInstance.destroy();
+            }
+
+            // Gráfico mixto: Barras totalmente pegadas (categoryPercentage: 1.0, barPercentage: 1.0) y Linea de frecuencia en el centro
+            chartHistInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Frecuencia Absoluta (fa)',
+                            data: valoresFa,
+                            backgroundColor: 'rgba(99, 102, 241, 0.65)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1,
+                            barPercentage: 1.0,
+                            categoryPercentage: 1.0
+                        },
+                        {
+                            type: 'line',
+                            label: 'Polígono de Frecuencias',
+                            data: valoresFa,
+                            borderColor: 'rgba(249, 115, 22, 1)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: 'rgba(249, 115, 22, 1)',
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function calcularPercentil(arr, p) {
+            let index = p * (arr.length - 1);
+            let lower = Math.floor(index);
+            let upper = Math.ceil(index);
+            let weight = index - lower;
+            if (upper >= arr.length) return arr[arr.length - 1];
+            return arr[lower] * (1 - weight) + arr[upper] * weight;
+        }
+
+        function ejecutarCajaBigotes() {
+            const { N, arrExpandido } = obtenerDatosCalculadosAux();
+            if (N === 0) {
+                mostrarError("No hay datos suficientes.");
+                return;
+            }
+
+            let min = arrExpandido[0];
+            let max = arrExpandido[arrExpandido.length - 1];
+            let q1 = calcularPercentil(arrExpandido, 0.25);
+            let q2 = calcularPercentil(arrExpandido, 0.50);
+            let q3 = calcularPercentil(arrExpandido, 0.75);
+            let riq = q3 - q1;
+            let li = q1 - 1.5 * riq;
+            let ls = q3 + 1.5 * riq;
+
+            document.getElementById('box-min').textContent = min;
+            document.getElementById('box-q1').textContent = q1.toFixed(2);
+            document.getElementById('box-q2').textContent = q2.toFixed(2);
+            document.getElementById('box-q3').textContent = q3.toFixed(2);
+            document.getElementById('box-max').textContent = max;
+            document.getElementById('box-riq').textContent = riq.toFixed(2);
+            document.getElementById('box-li').textContent = li.toFixed(2);
+            document.getElementById('box-ls').textContent = ls.toFixed(2);
+
+            // Generar diagrama de caja y bigotes preciso en SVG estilo |-----|=====|=====|-----|
+            renderizarSVGBoxplot(min, q1, q2, q3, max);
+        }
+
+        function renderizarSVGBoxplot(min, q1, q2, q3, max) {
+            const container = document.getElementById('svg-boxplot-container');
+            
+            // Normalizar coordenadas en un ancho SVG de 500px
+            let minVal = Math.min(min, q1);
+            let maxVal = Math.max(max, q3);
+            let rangoVal = maxVal - minVal || 1;
+
+            function escalaX(val) {
+                return 50 + ((val - minVal) / rangoVal) * 400;
+            }
+
+            let xMin = escalaX(min);
+            let xQ1 = escalaX(q1);
+            let xMed = escalaX(q2);
+            let xQ3 = escalaX(q3);
+            let xMax = escalaX(max);
+
+            let svgHTML = `
+                <svg viewBox="0 0 500 110" class="w-full h-24">
+                    <!-- Eje horizontal de referencia -->
+                    <line x1="40" y1="70" x2="460" y2="70" stroke="#475569" stroke-width="2" stroke-dasharray="4"/>
+                    
+                    <!-- Bigote Izquierdo (|-----) -->
+                    <line x1="${xMin}" y1="45" x2="${xMin}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="${xMin}" y1="60" x2="${xQ1}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    
+                    <!-- Caja de Cuartiles (=====|=====) -->
+                    <rect x="${xQ1}" y="35" width="${Math.max(2, xQ3 - xQ1)}" height="50" fill="rgba(99, 102, 241, 0.3)" stroke="#6366f1" stroke-width="2.5" rx="4"/>
+                    
+                    <!-- Línea de Mediana (Q2) -->
+                    <line x1="${xMed}" y1="35" x2="${xMed}" y2="85" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <!-- Bigote Derecho (-----|) -->
+                    <line x1="${xQ3}" y1="60" x2="${xMax}" y2="60" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3"/>
+                    <line x1="${xMax}" y1="45" x2="${xMax}" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <!-- Etiquetas de Valores -->
+                    <text x="${xMin}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${min}</text>
+                    <text x="${xQ1}" y="22" fill="#818cf8" font-size="10" text-anchor="middle" font-weight="600">Q1: ${q1.toFixed(1)}</text>
+                    <text x="${xMed}" y="100" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="700">Me: ${q2.toFixed(1)}</text>
+                    <text x="${xQ3}" y="22" fill="#818cf8" font-size="10" text-anchor="middle" font-weight="600">Q3: ${q3.toFixed(1)}</text>
+                    <text x="${xMax}" y="100" fill="#94a3b8" font-size="10" text-anchor="middle" font-weight="600">${max}</text>
+                </svg>
+            `;
+
+            container.innerHTML = svgHTML;
+        }
+    </script>
+</body>
+</html>
