@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#111827">
-<title>pul.po | Aula Lab</title>
+<title>Aprendiendo con el Pul.po</title>
 <style>
 :root {
   --bg: #0b1120;
@@ -29,7 +29,7 @@ header {
   padding: 18px 6%;
 }
 .nav {
-  max-width: 1150px;
+  max-width: 1700px;
   margin: auto;
   display: flex;
   align-items: center;
@@ -53,7 +53,7 @@ header {
 .nav small { color: var(--muted); }
 main {
   width: 90%;
-  max-width: 1150px;
+  max-width: 1700px;
   margin: 35px auto 70px;
 }
 .hero {
@@ -128,7 +128,7 @@ h2 { font-size: 22px; margin: 0; }
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 17px;
 }
 .card {
@@ -149,12 +149,13 @@ h2 { font-size: 22px; margin: 0; }
   place-items: center;
   font-size: 52px;
 }
-.blue { background: linear-gradient(135deg,#164e63,#0e7490); }
-.purple { background: linear-gradient(135deg,#3b276d,#6d28d9); }
-.orange { background: linear-gradient(135deg,#78350f,#c2410c); }
+.blue { background: linear-gradient(0deg,rgba(34, 72, 195, 1) 0%, rgba(40, 191, 186, 1) 100%); }
+.purple { background: radial-gradient(circle,rgba(193, 201, 32, 1) 22%, rgba(201, 85, 112, 1) 100%); }
+.orange { background: radial-gradient(circle,rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%); }
 .green { background: linear-gradient(135deg,#14532d,#15803d); }
-.pink { background: linear-gradient(135deg,#831843,#be185d); }
+.pink { background: radial-gradient(circle,rgba(32, 148, 150, 1) 0%, rgba(90, 158, 123, 1) 26%, rgba(174, 53, 176, 1) 41%, rgba(253, 187, 45, 1) 100%); }
 .card-body { padding: 18px; }
+.yellow { background: linear-gradient(90deg,rgba(31, 122, 156, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(214, 184, 75, 1) 90%, rgba(237, 221, 83, 1) 100%);}
 .tag {
   color: #7dd3fc;
   font-size: 11px;
@@ -217,7 +218,7 @@ footer {
   <div class="nav">
     <div class="brand">
       <span class="logo">🎓</span>
-      <span>AULA LAB</span>
+      <span>Aprendiendo con el Pul.po</span>
     </div>
     <small>COMERCIO INTERNACIONAL · REPOSITORIO pul.po</small>
   </div>
@@ -273,7 +274,7 @@ footer {
 </main>
 
 <footer>
-  Aula Lab · Universidad Nacional de Luján
+   Aprendiendo con el pul.po · Universidad Nacional de Luján
 </footer>
 
 <script>
@@ -281,9 +282,9 @@ footer {
 // 1. TU LISTA DE EXÁMENES
 // =========================================================================
 const misExamenes = [
-  { carpeta: "Bio", archivo: "biologia_examen.html", titulo: "Examen_de_Biología", cover: "blue", emoji: "🧬" },
-  { carpeta: "Bio", archivo: "Huesos.html", titulo: "Articulacion_y_Huesos_intervenientes", cover: "blue", emoji: "🧬" },
-  { carpeta: "Bio", archivo: "Class.html", titulo: "Sistemas_del_cuerpo_humano", cover: "blue", emoji: "🧬" },
+  { carpeta: "Bio", archivo: "biologia_examen.html", titulo: "Examen_de_Biología", cover: "pink", emoji: "🧬" },
+  { carpeta: "Bio", archivo: "Huesos.html", titulo: "Articulacion_y_Huesos_intervenientes", cover: "pink", emoji: "🧬" },
+  { carpeta: "Bio", archivo: "Class.html", titulo: "Sistemas_del_cuerpo_humano", cover: "pink", emoji: "🧬" },
   { carpeta: "Estadistica", archivo: "Calc.html", titulo: "Calculadora_de_FR", cover: "purple", emoji: "📈" },
   { carpeta: "Estadistica", archivo: "CalcDIF.html", titulo: "Calculadora_de_FR_Autoevaluativa", cover: "purple", emoji: "📈" },
   { carpeta: "Estadistica", archivo: "PM.html", titulo: "Calculadora_de_PM_FR", cover: "purple", emoji: "📈" },
