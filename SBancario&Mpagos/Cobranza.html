@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cobranza Documentaria a Plazo | Aula Lab</title>
+<style>
+:root{color-scheme:light;--ink:#171717;--line:#333;--paper:#fff;--muted:#666}
+*{box-sizing:border-box}body{margin:0;background:#f4f4f4;color:var(--ink);font:15px/1.45 Arial,Helvetica,sans-serif}
+header{padding:24px clamp(18px,4vw,52px);background:#fff;border-bottom:1px solid #ddd}
+header h1{font-size:clamp(25px,3.5vw,42px);font-weight:500;margin:0;letter-spacing:-1.2px}
+main{display:grid;grid-template-columns:minmax(500px,1.15fr) minmax(350px,.85fr);gap:22px;padding:22px;max-width:1700px;margin:auto;align-items:start}
+.panel{background:#fff;border:1px solid #d5d5d5;border-radius:12px;padding:18px;min-width:0}
+.panel h2{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 15px;color:#555}
+.diagram-wrap{width:100%;overflow:hidden}
+.diagram{position:relative;width:100%;aspect-ratio:1000/690;background:#fff;border:1px solid #e4e4e4;border-radius:8px;overflow:hidden}
+svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.arrow{fill:none;stroke:#222;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#head);transition:stroke .15s,stroke-width .15s}
+.arrow.step1{stroke-width:3.5}
+.arrow.active{stroke:var(--hot,#111);stroke-width:6}
+.num{position:absolute;transform:translate(-50%,-50%);width:34px;height:34px;border:1.5px solid #222;border-radius:50%;background:#fff;color:#111;font-weight:700;font-size:15px;cursor:pointer;display:grid;place-items:center;z-index:3;transition:background .15s,color .15s,border-color .15s}
+.num.active{background:var(--hot,#111);border-color:var(--hot,#111);color:white}
+.actor{position:absolute;transform:translate(-50%,-50%);width:26%;min-width:115px;max-width:210px;padding:9px 10px;border:2px solid var(--actor);border-radius:8px;background:#fff;z-index:2;text-align:center}
+.actor input[type=text]{display:block;width:100%;border:0;border-bottom:1px solid #bbb;background:transparent;text-align:center;font-weight:700;font-size:clamp(10px,1.25vw,15px);color:#171717;padding:3px 1px;outline:none}
+.actor input[type=text]:focus{border-bottom:2px solid var(--actor)}
+.actor .colorline{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:5px;font-size:10px;color:#555}
+.actor input[type=color]{width:25px;height:20px;border:0;padding:0;background:transparent;cursor:pointer}
+.actor.export{left:17%;top:13%;--actor:#23a6a6}
+.actor.import{left:83%;top:13%;--actor:#e5a15d}
+.actor.remit{left:17%;top:87%;--actor:#7e9eae}
+.actor.cobr{left:83%;top:87%;--actor:#d88b98}
+.step-list{display:grid;gap:9px}
+.step{border:1px solid #ddd;border-radius:8px;padding:11px 12px;display:grid;grid-template-columns:36px 1fr;gap:10px;cursor:pointer;transition:border-color .15s,background .15s}
+.step.active{border:2px solid var(--hot,#222);background:#f7f7f7;padding:10px 11px}
+.step .badge{width:30px;height:30px;border:1.5px solid #222;border-radius:50%;display:grid;place-items:center;font-weight:700}
+.step.active .badge{background:var(--hot,#222);border-color:var(--hot,#222);color:white}
+.step strong{display:block;font-size:14px;margin:1px 0 3px}
+.step p{margin:0;color:#444;font-size:13px}
+.hint{font-size:12px;color:#777;margin:12px 0 0}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:12px}.panel{padding:13px}.actor{min-width:100px}.actor input[type=text]{font-size:11px}}
+@media(max-width:520px){header{padding:17px}.diagram{min-width:480px}.diagram-wrap{overflow-x:auto;padding-bottom:5px}.actor{min-width:120px}.step p{font-size:12px}}
+</style>
+</head>
+<body>
+<header><h1>Cobranza Documentaria a Plazo</h1></header>
+<main>
+<section class="panel">
+<h2>01 / Circuito de la operación</h2>
+<div class="diagram-wrap">
+<div class="diagram" id="diagram">
+<svg viewBox="0 0 1000 690" aria-label="Circuito de cobranza documentaria">
+<defs><marker id="head" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>
+<!-- 1: dos trazos independientes que se encuentran en el centro -->
+<path class="arrow step1" data-step="1" d="M300 75 L485 75"/>
+<path class="arrow step1" data-step="1" d="M700 75 L515 75"/>
+<!-- 2: exportador hacia importador -->
+<path class="arrow" data-step="2" d="M300 115 L700 115"/>
+<!-- 3: exportador hacia banco remitente -->
+<path class="arrow" data-step="3" d="M145 140 L145 550"/>
+<!-- 8: banco remitente hacia exportador, carril independiente -->
+<path class="arrow" data-step="8" d="M245 550 L245 140"/>
+<!-- 5: banco cobrador hacia importador -->
+<path class="arrow" data-step="5" d="M855 550 L855 140"/>
+<!-- 6: importador hacia banco cobrador, carril independiente -->
+<path class="arrow" data-step="6" d="M755 140 L755 550"/>
+<!-- 4: banco remitente hacia banco cobrador -->
+<path class="arrow" data-step="4" d="M300 575 L700 575"/>
+<!-- 7: banco cobrador hacia banco remitente, carril independiente -->
+<path class="arrow" data-step="7" d="M700 625 L300 625"/>
+</svg>
+<div class="actor export"><input id="name-export" type="text" value="EXPORTADOR / LIBRADOR" aria-label="Nombre del exportador"><div class="colorline">Color <input id="color-export" type="color" value="#23a6a6"></div></div>
+<div class="actor import"><input id="name-import" type="text" value="IMPORTADOR / GIRADO" aria-label="Nombre del importador"><div class="colorline">Color <input id="color-import" type="color" value="#e5a15d"></div></div>
+<div class="actor remit"><input id="name-remit" type="text" value="BANCO REMITENTE" aria-label="Nombre del banco remitente"><div class="colorline">Color <input id="color-remit" type="color" value="#7e9eae"></div></div>
+<div class="actor cobr"><input id="name-cobr" type="text" value="BANCO COBRADOR" aria-label="Nombre del banco cobrador"><div class="colorline">Color <input id="color-cobr" type="color" value="#d88b98"></div></div>
+<button class="num" data-step="1" style="left:50%;top:11.2%">1</button>
+<button class="num" data-step="2" style="left:50%;top:16.8%">2</button>
+<button class="num" data-step="3" style="left:14.5%;top:48%">3</button>
+<button class="num" data-step="8" style="left:24.5%;top:48%">8</button>
+<button class="num" data-step="5" style="left:85.5%;top:48%">5</button>
+<button class="num" data-step="6" style="left:75.5%;top:48%">6</button>
+<button class="num" data-step="4" style="left:50%;top:83.3%">4</button>
+<button class="num" data-step="7" style="left:50%;top:91%">7</button>
+</div></div>
+<p class="hint">Editá los nombres y colores.</p>
+</section>
+<section class="panel">
+<h2>02 / Paso a paso</h2>
+<div class="step-list" id="steps">
+<article class="step" data-step="1"><span class="badge">1</span><div><strong>Contrato de compraventa internacional</strong><p><span data-name="export">EXPORTADOR / LIBRADOR</span> y <span data-name="import">IMPORTADOR / GIRADO</span> acuerdan las condiciones de la operación.</p></div></article>
+<article class="step" data-step="2"><span class="badge">2</span><div><strong>Envío o embarque de las mercaderías</strong><p>El <span data-name="export">EXPORTADOR / LIBRADOR</span> envía las mercaderías al <span data-name="import">IMPORTADOR / GIRADO</span>.</p></div></article>
+<article class="step" data-step="3"><span class="badge">3</span><div><strong>Envío de documentos e instrucción de cobro</strong><p>El <span data-name="export">EXPORTADOR / LIBRADOR</span> entrega los documentos de embarque, la instrucción de cobro y la letra de cambio al <span data-name="remit">BANCO REMITENTE</span>.</p></div></article>
+<article class="step" data-step="4"><span class="badge">4</span><div><strong>Envío de documentos entre bancos</strong><p>El <span data-name="remit">BANCO REMITENTE</span> envía los documentos al <span data-name="cobr">BANCO COBRADOR</span>.</p></div></article>
+<article class="step" data-step="5"><span class="badge">5</span><div><strong>Aceptación de la letra de cambio</strong><p>El <span data-name="import">IMPORTADOR / GIRADO</span> acepta la letra de cambio y retira los documentos de embarque para desaduanar las mercaderías.</p></div></article>
+<article class="step" data-step="6"><span class="badge">6</span><div><strong>Pago al vencimiento</strong><p>Al vencimiento de la letra de cambio, el <span data-name="import">IMPORTADOR / GIRADO</span> paga al <span data-name="cobr">BANCO COBRADOR</span>.</p></div></article>
+<article class="step" data-step="7"><span class="badge">7</span><div><strong>Reembolso entre bancos</strong><p>El <span data-name="cobr">BANCO COBRADOR</span> realiza el reembolso al <span data-name="remit">BANCO REMITENTE</span>.</p></div></article>
+<article class="step" data-step="8"><span class="badge">8</span><div><strong>Pago al exportador</strong><p>El <span data-name="remit">BANCO REMITENTE</span> realiza el pago al <span data-name="export">EXPORTADOR / LIBRADOR</span>.</p></div></article>
+</div>
+</section>
+</main>
+<script>
+const actors={
+ export:{name:document.getElementById('name-export'),color:document.getElementById('color-export')},
+ import:{name:document.getElementById('name-import'),color:document.getElementById('color-import')},
+ remit:{name:document.getElementById('name-remit'),color:document.getElementById('color-remit')},
+ cobr:{name:document.getElementById('name-cobr'),color:document.getElementById('color-cobr')}
+};
+function sync(){
+ for(const [key,a] of Object.entries(actors)){
+  document.querySelectorAll(`[data-name="${key}"]`).forEach(el=>el.textContent=a.name.value.trim()||'________');
+  document.querySelectorAll('.actor.'+({export:'export',import:'import',remit:'remit',cobr:'cobr'}[key])).forEach(el=>el.style.setProperty('--actor',a.color.value));
+  document.querySelectorAll(`[data-name="${key}"]`).forEach(el=>el.style.color=a.color.value);
+ }
+}
+Object.values(actors).forEach(a=>{a.name.addEventListener('input',sync);a.color.addEventListener('input',sync)});
+function highlight(n){
+ document.querySelectorAll('[data-step]').forEach(el=>el.classList.toggle('active',el.dataset.step===String(n)));
+ const step=document.querySelector(`.step[data-step="${n}"]`);
+ const color=step?getComputedStyle(step).getPropertyValue('--hot'):'';
+ document.querySelectorAll(`.step[data-step="${n}"]`).forEach(el=>el.style.setProperty('--hot',actors[({1:'import',2:'export',3:'export',4:'remit',5:'cobr',6:'import',7:'cobr',8:'remit'})[n]]?.color.value||'#222'));
+ document.querySelectorAll(`.num[data-step="${n}"]`).forEach(el=>el.style.setProperty('--hot',actors[({1:'import',2:'export',3:'export',4:'remit',5:'cobr',6:'import',7:'cobr',8:'remit'})[n]]?.color.value||'#222'));
+ document.querySelectorAll(`.arrow[data-step="${n}"]`).forEach(el=>el.style.setProperty('--hot',actors[({1:'import',2:'export',3:'export',4:'remit',5:'cobr',6:'import',7:'cobr',8:'remit'})[n]]?.color.value||'#222'));
+}
+document.querySelectorAll('.num,.step').forEach(el=>{
+ const n=el.dataset.step;
+ el.addEventListener('mouseenter',()=>highlight(n));
+ el.addEventListener('mouseleave',()=>highlight(-1));
+ el.addEventListener('focus',()=>highlight(n));
+ el.addEventListener('blur',()=>highlight(-1));
+});
+sync();
+</script>
+</body></html>
