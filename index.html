@@ -1,226 +1,147 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-tema="oscuro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#0a0f1e">
+<meta name="description" content="Exámenes, prácticos y calculadoras interactivas de Comercio Internacional (UNLu).">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aprendiendo con el Pul.po">
+<meta property="og:description" content="Exámenes, prácticos y calculadoras interactivas de Comercio Internacional (UNLu).">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐙%3C/text%3E%3C/svg%3E">
 <title>Aprendiendo con el Pul.po</title>
+<script>
+(function(){
+  var t;
+  try { t = localStorage.getItem('tema'); } catch (e) {}
+  if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'oscuro';
+  document.documentElement.dataset.tema = t;
+})();
+</script>
 <style>
 :root {
-  --bg: #0b1120;
-  --panel: #151e30;
-  --border: #29364b;
-  --text: #f1f5f9;
-  --muted: #a3b1c6;
-  --accent: #38bdf8;
+  --bg:#070b16; --card:#0e1426; --bord:#1b2440; --bord2:#334155;
+  --txt:#e5e7eb; --txt2:#f1f5f9; --muted:#94a3b8; --fondo2:#0a0f1e;
+  --numbg:#10224a; --numbd:#1d3a7a; --acc:#60a5fa; --acc-hover:#93c5fd;
+  --onacc:#071521;
+}
+[data-tema=claro] {
+  --bg:#f3f3f3; --card:#fff; --bord:#e3e3e3; --bord2:#c4c9ce;
+  --txt:#222; --txt2:#111; --muted:#666; --fondo2:#fff;
+  --numbg:#eef4ff; --numbd:#bcd0f5; --acc:#1d4ed8; --acc-hover:#1e40af;
+  --onacc:#fff;
 }
 * { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui, Arial, sans-serif; }
+button, input, select { font:inherit; }
+:focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, Arial, sans-serif;
-}
-button, input { font: inherit; }
-header {
-  border-bottom: 1px solid var(--border);
-  background: #101827;
-  padding: 18px 6%;
-}
-.nav {
-  max-width: 1700px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 21px;
-  font-weight: 850;
-  letter-spacing: 1px;
-}
-.logo {
-  background: var(--accent);
-  color: #082032;
-  padding: 10px;
-  border-radius: 12px;
-}
-.nav small { color: var(--muted); }
-main {
-  width: 90%;
-  max-width: 1700px;
-  margin: 35px auto 70px;
-}
+header { border-bottom:1px solid var(--bord); background:var(--fondo2); padding:18px 6%; }
+.nav { max-width:1700px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:15px; }
+.brand { display:flex; align-items:center; gap:12px; font-size:21px; font-weight:850; letter-spacing:1px; color:var(--txt2); }
+.logo { background:var(--acc); color:var(--onacc); padding:10px; border-radius:12px; }
+.nav small { color:var(--muted); }
+.derecha { display:flex; align-items:center; gap:16px; }
+
+.musica { display:flex; align-items:center; gap:8px; padding:4px 10px 4px 4px; border:1px solid var(--bord2); border-radius:999px; background:var(--card); }
+.musica button { border:0; background:none; color:var(--txt); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:999px; }
+.musica input { width:80px; accent-color:var(--acc); }
+
+main { width:90%; max-width:1700px; margin:35px auto 70px; }
 .hero {
-  padding: clamp(25px, 5vw, 55px);
-  border: 1px solid var(--border);
-  border-radius: 25px;
-  background:
-    radial-gradient(ellipse at 90% 0%, #164e6355, transparent 45%),
-    linear-gradient(135deg, #172338, #111827);
+  padding:clamp(25px, 5vw, 55px); border:1px solid var(--bord); border-radius:25px;
+  background:linear-gradient(135deg, var(--numbg), var(--fondo2));
 }
-.eyebrow {
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-h1 {
-  font-size: clamp(35px, 6vw, 62px);
-  line-height: 1.05;
-  margin: 15px 0;
-  letter-spacing: -2px;
-}
-.hero p {
-  max-width: 570px;
-  color: var(--muted);
-  line-height: 1.7;
-}
-.search {
-  display: flex;
-  gap: 10px;
-  margin-top: 25px;
-  max-width: 650px;
-}
+.eyebrow { color:var(--acc); font-size:12px; font-weight:800; letter-spacing:2px; }
+h1 { font-size:clamp(35px, 6vw, 62px); line-height:1.05; margin:15px 0; letter-spacing:-2px; color:var(--txt2); }
+.hero p { max-width:570px; color:var(--muted); line-height:1.7; }
+
+.search { position:relative; margin-top:25px; max-width:650px; }
 .search input {
-  width: 100%;
-  min-width: 0;
-  padding: 15px;
-  color: white;
-  background: #0b1120;
-  border: 1px solid #40506a;
-  border-radius: 12px;
-  outline-color: var(--accent);
+  width:100%; padding:15px 46px 15px 15px; color:var(--txt); background:var(--bg);
+  border:1px solid var(--bord2); border-radius:12px;
 }
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 35px 0 17px;
+.search input::-webkit-search-cancel-button { display:none; }
+.search button {
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  border:0; background:none; color:var(--muted); font-size:18px; cursor:pointer; padding:8px; border-radius:8px;
 }
-h2 { font-size: 22px; margin: 0; }
-.counter { color: var(--muted); font-size: 13px; }
-.categories {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-/* BOTONES OCULTOS POR DEFECTO */
+.search button:hover { color:var(--txt2); }
+
+.section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:35px 0 17px; }
+.section-head .controles { display:flex; align-items:center; gap:14px; }
+h2 { font-size:22px; margin:0; color:var(--txt2); }
+.titulo { margin:35px 0 17px; }
+.counter { color:var(--muted); font-size:13px; }
+select { background:var(--card); color:var(--txt); border:1px solid var(--bord2); border-radius:10px; padding:8px 10px; }
+
+.categories { display:flex; gap:9px; flex-wrap:wrap; }
 .category {
-  background: var(--panel);
-  color: #dbeafe;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 10px 16px;
-  cursor: pointer;
-  display: none; 
+  background:var(--card); color:var(--txt); border:1px solid var(--bord);
+  border-radius:999px; padding:10px 16px; cursor:pointer;
 }
-.category:hover, .category.active {
-  background: #075985;
-  border-color: #38bdf8;
-  color: white;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 17px;
-}
+.category:hover, .category[aria-pressed=true] { background:var(--acc); border-color:var(--acc); color:var(--onacc); }
+
+.grupo { font-size:17px; margin:28px 0 14px; color:var(--txt2); }
+.grupo:first-child { margin-top:0; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(230px, 100%), 1fr)); gap:17px; }
 .card {
-  min-width: 0;
-  overflow: hidden;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  transition: transform .2s, border-color .2s;
+  min-width:0; overflow:hidden; background:var(--card); border:1px solid var(--bord);
+  border-radius:18px; transition:transform .2s, border-color .2s;
 }
-.card:hover {
-  transform: translateY(-3px);
-  border-color: #38bdf8;
-}
-.cover {
-  min-height: 130px;
-  display: grid;
-  place-items: center;
-  font-size: 52px;
-}
-.blue { background: linear-gradient(0deg,rgba(34, 72, 195, 1) 0%, rgba(40, 191, 186, 1) 100%); }
-.purple { background: radial-gradient(circle,rgba(193, 201, 32, 1) 22%, rgba(201, 85, 112, 1) 100%); }
-.orange { background: radial-gradient(circle,rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%); }
-.green { background: linear-gradient(135deg,#14532d,#15803d); }
-.pink { background: radial-gradient(circle,rgba(32, 148, 150, 1) 0%, rgba(90, 158, 123, 1) 26%, rgba(174, 53, 176, 1) 41%, rgba(253, 187, 45, 1) 100%); }
-.card-body { padding: 18px; }
-.yellow { background: linear-gradient(90deg,rgba(31, 122, 156, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(214, 184, 75, 1) 90%, rgba(237, 221, 83, 1) 100%);}
-.tag {
-  color: #7dd3fc;
-  font-size: 11px;
-  font-weight: 750;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-}
-.card h3 { font-size: 18px; margin: 9px 0; }
-.card p {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-  min-height: 42px;
-}
+.card:hover { transform:translateY(-3px); border-color:var(--acc); }
+.cover { min-height:130px; display:grid; place-items:center; font-size:52px; }
+.card-body { padding:18px; }
+.tag { color:var(--acc); font-size:11px; font-weight:750; text-transform:uppercase; letter-spacing:.8px; }
+.card h3, .card h4 { font-size:18px; margin:9px 0; color:var(--txt2); }
+.card p { color:var(--muted); font-size:13px; line-height:1.6; min-height:42px; margin:0; }
 .play {
-  display: block;
-  text-align: center;
-  text-decoration: none;
-  color: #071521;
-  background: var(--accent);
-  padding: 11px;
-  margin-top: 15px;
-  border-radius: 10px;
-  font-weight: 800;
+  display:block; text-align:center; text-decoration:none; color:var(--onacc); background:var(--acc);
+  padding:11px; margin-top:15px; border-radius:10px; font-weight:800;
 }
-.play:hover { background: #7dd3fc; }
-.empty {
-  display: none;
-  padding: 35px;
-  text-align: center;
-  color: var(--muted);
-  border: 1px dashed var(--border);
-  border-radius: 15px;
+.play:hover { background:var(--acc-hover); }
+.empty { padding:35px; text-align:center; color:var(--muted); border:1px dashed var(--bord2); border-radius:15px; }
+[hidden] { display:none !important; }
+
+footer { text-align:center; color:var(--muted); padding:25px; border-top:1px solid var(--bord); font-size:13px; }
+
+.tema {
+  position:fixed; bottom:14px; right:14px; z-index:60; font-size:13px; font-weight:700;
+  padding:9px 14px; border:1px solid var(--bord2); border-radius:20px;
+  background:var(--card); color:var(--txt); cursor:pointer; box-shadow:0 2px 10px #0004;
 }
-footer {
-  text-align: center;
-  color: var(--muted);
-  padding: 25px;
-  border-top: 1px solid var(--border);
-  font-size: 13px;
+
+@media (max-width:480px) {
+  header { padding:14px 5%; }
+  .nav small { display:none; }
+  .brand { font-size:18px; }
+  main { width:92%; margin-top:20px; }
+  .cover { min-height:110px; }
+  .section-head { align-items:flex-start; flex-direction:column; }
 }
-@media(max-width:800px) {
-  .grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-}
-@media(max-width:480px) {
-  header { padding: 14px 5%; }
-  .nav small { display: none; }
-  main { width: 92%; margin-top: 20px; }
-  .grid { grid-template-columns: 1fr; }
-  .cover { min-height: 110px; }
-  .section-head { align-items: flex-start; flex-direction: column; }
+@media (prefers-reduced-motion: reduce) {
+  .card { transition:none; }
+  .card:hover { transform:none; }
 }
 </style>
 </head>
 <body>
 
-<audio id="bg-music" loop src="./music-control.mp3"></audio>
+<audio id="bg-music" loop preload="none" src="./music-control.mp3"></audio>
 
 <header>
   <div class="nav">
     <div class="brand">
-      <span class="logo">🎓</span>
+      <span class="logo" aria-hidden="true">🎓</span>
       <span>Aprendiendo con el Pul.po</span>
     </div>
-    <small>COMERCIO INTERNACIONAL · REPOSITORIO pul.po</small>
+    <div class="derecha">
+      <small>COMERCIO INTERNACIONAL · REPOSITORIO pul.po</small>
+      <div class="musica">
+        <button id="btnMusica" type="button"></button>
+        <input id="vol" type="range" min="0" max="100" aria-label="Volumen de la música">
+      </div>
+    </div>
   </div>
 </header>
 
@@ -228,179 +149,198 @@ footer {
   <section class="hero">
     <div class="eyebrow">TU BIBLIOTECA ACADÉMICA</div>
     <h1>Aprender<br>jugando.</h1>
-    <p>
-      Explorá exámenes y prácticos organizados por carpeta. 
-      Las materias se mostrarán automáticamente cuando agregues contenido.
-    </p>
+    <p>Explorá los exámenes, prácticos y calculadoras de cada materia, y practicá a tu ritmo.</p>
     <div class="search">
-      <input id="search" type="search" placeholder="🔎 Buscar exámenes o materias..." aria-label="Buscar">
+      <input id="search" type="search" placeholder="🔎 Buscar actividades o materias...  ( / )" aria-label="Buscar">
+      <button id="limpiar" type="button" aria-label="Limpiar búsqueda" hidden>✕</button>
     </div>
   </section>
 
   <section>
-    <div class="section-head">
-      <h2>Materias</h2>
-    </div>
-    <div class="categories" id="categories">
-      <!-- BOTONES DE TODAS TUS MATERIAS -->
-      <button class="category active" data-category="Todos" id="btn-todos">Todos</button>
-      <button class="category" data-category="Contabilidad">📊 Contabilidad</button>
-      <button class="category" data-category="Ingles">🇬🇧 Inglés</button>
-      <button class="category" data-category="Instituciones del Derecho Privado">⚖️ Instituciones del Derecho Privado</button>
-      <button class="category" data-category="Estadistica">📈 Estadistica</button>
-      <button class="category" data-category="Administración General">🏛️ Administración General</button>
-      <button class="category" data-category="Sistema Bancario y Financiero en el Comercio Internacional">💳 Sistema Bancario y Financiero</button>
-      <button class="category" data-category="Portugués">🇧🇷 Portugués</button>
-      <button class="category" data-category="Marketing">🎯 Marketing</button>
-      <button class="category" data-category="Sistemas humanos">👥 Sistemas humanos</button>
-      <button class="category" data-category="Bio">🧬 Bio</button>
-    </div>
+    <h2 class="titulo">Materias</h2>
+    <div class="categories" id="categories"></div>
   </section>
 
   <section>
     <div class="section-head">
-      <h2>Exámenes y Trabajos</h2>
-      <span class="counter" id="counter"></span>
+      <h2>Actividades</h2>
+      <div class="controles">
+        <span class="counter" id="counter" aria-live="polite"></span>
+        <select id="orden" aria-label="Ordenar actividades">
+          <option value="materia">Por materia</option>
+          <option value="az">Todas A-Z</option>
+        </select>
+      </div>
     </div>
-
-    <div class="grid" id="games">
-        <!-- Las tarjetas se generan aquí -->
-    </div>
-
-    <div class="empty" id="empty">
-      No encontramos archivos con esa búsqueda.
-    </div>
+    <div id="games"></div>
+    <div class="empty" id="empty" hidden></div>
   </section>
 </main>
 
-<footer>
-   Aprendiendo con el pul.po · Universidad Nacional de Luján
-</footer>
+<footer>Aprendiendo con el pul.po · Universidad Nacional de Luján</footer>
+
+<button id="btnTema" class="tema" type="button"></button>
 
 <script>
-// =========================================================================
-// 1. TU LISTA DE EXÁMENES
-// =========================================================================
-const misExamenes = [
-  { carpeta: "Bio", archivo: "biologia_examen.html", titulo: "Examen_de_Biología", cover: "pink", emoji: "🧬" },
-  { carpeta: "Bio", archivo: "Huesos.html", titulo: "Articulacion_y_Huesos_intervenientes", cover: "pink", emoji: "🧬" },
-  { carpeta: "Bio", archivo: "Class.html", titulo: "Sistemas_del_cuerpo_humano", cover: "pink", emoji: "🧬" },
-  { carpeta: "Estadistica", archivo: "Calc.html", titulo: "Calculadora_de_FR", cover: "purple", emoji: "📈" },
-  { carpeta: "Estadistica", archivo: "CalcDIF.html", titulo: "Calculadora_de_FR_Autoevaluativa", cover: "purple", emoji: "📈" },
-  { carpeta: "Estadistica", archivo: "PM.html", titulo: "Calculadora_de_PM_FR", cover: "purple", emoji: "📈" },
-  { carpeta: "Estadistica", archivo: "PMDif.html", titulo: "Calculadora_de_PM_FR_Autoevaluativa", cover: "purple", emoji: "📈" },
-  { carpeta: "Contabilidad", archivo: "LBSS.html", titulo: "Libro_Diario_con_Sumas_y_Saldos", cover: "yellow", emoji: "🧮" },
-  { carpeta: "Contabilidad", archivo: "BG.html", titulo: "Balance General FINAL", cover: "yellow", emoji: "🧮" },
-  { carpeta: "Contabilidad", archivo: "Clas.html", titulo: "Clasificacion de cuentas", cover: "yellow", emoji: "🧮" },
-  { carpeta: "Instituciones del Derecho Privado", archivo: "Responsabilidad.html", titulo: "Examen de Responsabilidades de las partes", cover: "blue", emoji: "⚖️" },
-  { carpeta: "SBancario&Mpagos", archivo: "LetraCambio.html", titulo: "Letra_de_Cambio", cover: "blue", emoji: "🏦" },
-  { carpeta: "SBancario&Mpagos", archivo: "Cobranza.html", titulo: "Cobranza", cover: "blue", emoji: "🏦" },
-  { carpeta: "SBancario&Mpagos", archivo: "ExamenC.html", titulo: "Examen_circuito:_Diferido", cover: "blue", emoji: "🏦" },
-  { carpeta: "SBancario&Mpagos", archivo: "orden.html", titulo: "Orden_de_pago_diferido", cover: "blue", emoji: "🏦" },
-  { carpeta: "SBancario&Mpagos", archivo: "CircuitoLC.html", titulo: "Circuito_operativo_de_una_LC", cover: "blue", emoji: "🏦" },
-  { carpeta: "SBancario&Mpagos", archivo: "LC.html", titulo: "Examen_de_circuito_Credito", cover: "blue", emoji: "🏦" },
-  { carpeta: "Ingles", archivo: "ingles_tp.html", titulo: "Práctica_de_Inglés", cover: "orange", emoji: "🇬🇧" }
+const materias = {
+  bio:        { nombre: "Bio",                               carpeta: "Bio",          emoji: "🧬", color: "linear-gradient(135deg,#065f46,#10b981)" },
+  contabilidad:{ nombre: "Contabilidad",                     carpeta: "Contabilidad", emoji: "🧮", color: "linear-gradient(135deg,#92400e,#d4a017)" },
+  estadistica:{ nombre: "Estadística",                       carpeta: "Estadistica",  emoji: "📈", color: "linear-gradient(135deg,#4c1d95,#8b5cf6)" },
+  ingles:     { nombre: "Inglés",                            carpeta: "Ingles",       emoji: "🇬🇧", color: "linear-gradient(135deg,#7f1d1d,#ef4444)" },
+  derpriv:    { nombre: "Instituciones del Derecho Privado", corto: "Derecho Privado", carpeta: "Der.Priv", emoji: "⚖️", color: "linear-gradient(135deg,#1e3a8a,#3b82f6)" },
+  bancario:   { nombre: "Sistema Bancario y Financiero",     corto: "Sistema Bancario", carpeta: "S.Bancario", emoji: "🏦", color: "linear-gradient(135deg,#155e75,#22d3ee)" },
+  adm:        { nombre: "Administración General",            carpeta: "Adm.General",  emoji: "🏛️", color: "linear-gradient(135deg,#334155,#94a3b8)" },
+  portugues:  { nombre: "Portugués",                         carpeta: "Portugues",    emoji: "🇧🇷", color: "linear-gradient(135deg,#3f6212,#a3e635)" },
+  marketing:  { nombre: "Marketing",                         carpeta: "Marketing",    emoji: "🎯", color: "linear-gradient(135deg,#9a3412,#fb923c)" },
+  humanos:    { nombre: "Sistemas humanos",                  carpeta: "Sist.Humanos", emoji: "👥", color: "linear-gradient(135deg,#9d174d,#f472b6)" }
+};
+
+const actividades = [
+  { materia: "bio", archivo: "biologia_examen.html", titulo: "Examen de Biología" },
+  { materia: "bio", archivo: "Huesos.html", titulo: "Articulación y huesos intervinientes" },
+  { materia: "bio", archivo: "Class.html", titulo: "Sistemas del cuerpo humano" },
+  { materia: "estadistica", archivo: "Calc.html", titulo: "Calculadora de FR" },
+  { materia: "estadistica", archivo: "CalcDIF.html", titulo: "Calculadora de FR autoevaluativa" },
+  { materia: "estadistica", archivo: "PM.html", titulo: "Calculadora de PM FR" },
+  { materia: "estadistica", archivo: "PMDif.html", titulo: "Calculadora de PM FR autoevaluativa" },
+  { materia: "contabilidad", archivo: "LBSS.html", titulo: "Libro Diario con Sumas y Saldos" },
+  { materia: "contabilidad", archivo: "BG.html", titulo: "Balance General FINAL" },
+  { materia: "contabilidad", archivo: "Clas.html", titulo: "Clasificación de cuentas" },
+  { materia: "derpriv", archivo: "Responsabilidad.html", titulo: "Examen de responsabilidades de las partes" },
+  { materia: "bancario", archivo: "LetraCambio.html", titulo: "Letra de Cambio" },
+  { materia: "bancario", archivo: "Cobranza.html", titulo: "Cobranza" },
+  { materia: "bancario", archivo: "ExamenC.html", titulo: "Examen circuito: Diferido" },
+  { materia: "bancario", archivo: "orden.html", titulo: "Orden de pago diferido" },
+  { materia: "bancario", archivo: "CircuitoLC.html", titulo: "Circuito operativo de una LC" },
+  { materia: "bancario", archivo: "LC.html", titulo: "Examen de circuito: Crédito" },
+  { materia: "ingles", archivo: "ingles_tp.html", titulo: "Práctica de Inglés" }
 ];
 
-// LÓGICA PARA CREAR TARJETAS Y OCULTAR CATEGORÍAS VACÍAS
-function cargarTarjetas() {
-  const grid = document.getElementById("games");
-  grid.innerHTML = "";
-  let categoriasActivas = new Set();
+const $ = id => document.getElementById(id);
+const ls = {
+  get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+const ss = {
+  get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} }
+};
+const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const collator = new Intl.Collator("es");
 
-  if (misExamenes.length === 0) {
-    grid.innerHTML = '<div style="color: var(--muted); grid-column: span 3; text-align: center;">Aún no hay exámenes agregados en el código.</div>';
-    document.getElementById("btn-todos").style.display = "none";
-    return;
+const lista = actividades.map(a => {
+  const m = materias[a.materia];
+  return { ...a, m, ruta: encodeURI(m.carpeta + "/" + a.archivo), busca: norm(a.titulo + " " + m.nombre) };
+});
+
+const search = $("search"), limpiar = $("limpiar"), ordenSel = $("orden");
+const counter = $("counter"), empty = $("empty"), games = $("games"), cats = $("categories");
+
+const leerHash = () => { const id = location.hash.slice(1); return materias[id] ? id : "todos"; };
+let materia = leerHash();
+let orden = ls.get("orden") === "az" ? "az" : "materia";
+search.value = ss.get("buscar") || "";
+ordenSel.value = orden;
+
+cats.innerHTML = [["todos", "Todos"], ...Object.entries(materias).map(([id, m]) => [id, m.emoji + " " + (m.corto || m.nombre)])]
+  .map(([id, txt]) => `<button class="category" type="button" data-id="${id}">${txt}</button>`).join("");
+const botones = [...cats.querySelectorAll(".category")];
+
+function tarjeta(a, h) {
+  return `<article class="card">
+    <div class="cover" style="background:${a.m.color}"><span aria-hidden="true">${a.m.emoji}</span></div>
+    <div class="card-body">
+      <span class="tag">${a.m.nombre}</span>
+      <${h}>${a.titulo}</${h}>
+      <p>Actividad interactiva de ${a.m.nombre}.</p>
+      <a class="play" href="${a.ruta}">Acceder a la actividad →</a>
+    </div>
+  </article>`;
+}
+
+function render() {
+  const q = norm(search.value.trim());
+  const res = lista.filter(a => (materia === "todos" || a.materia === materia) && a.busca.includes(q));
+  const agrupar = orden === "materia" && materia === "todos";
+
+  res.sort(orden === "materia"
+    ? (a, b) => collator.compare(a.m.nombre, b.m.nombre) || collator.compare(a.titulo, b.titulo)
+    : (a, b) => collator.compare(a.titulo, b.titulo));
+
+  if (agrupar) {
+    const grupos = new Map();
+    res.forEach(a => { if (!grupos.has(a.materia)) grupos.set(a.materia, []); grupos.get(a.materia).push(a); });
+    games.innerHTML = [...grupos].map(([id, items]) =>
+      `<h3 class="grupo">${materias[id].emoji} ${materias[id].nombre}</h3>
+       <div class="grid">${items.map(a => tarjeta(a, "h4")).join("")}</div>`).join("");
+  } else {
+    games.innerHTML = `<div class="grid">${res.map(a => tarjeta(a, "h3")).join("")}</div>`;
   }
 
-  document.getElementById("btn-todos").style.display = "inline-block";
-
-  // Crear tarjeta por cada examen
-  misExamenes.forEach(item => {
-    categoriasActivas.add(item.carpeta);
-    const card = document.createElement("article");
-    card.className = "card";
-    card.dataset.category = item.carpeta;
-    card.dataset.search = (item.titulo + " " + item.carpeta).toLowerCase();
-
-    // AQUÍ SE CONSTRUYE LA RUTA: carpeta/archivo.html
-    const rutaExamen = `${item.carpeta}/${item.archivo}`;
-
-    card.innerHTML = `
-      <div class="cover ${item.cover}">${item.emoji}</div>
-      <div class="card-body">
-        <span class="tag">${item.carpeta}</span>
-        <h3>${item.titulo}</h3>
-        <p>Evaluación interactiva de ${item.carpeta}.</p>
-        <a class="play" href="${rutaExamen}">Acceder al examen →</a>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-
-  // Mostrar SOLO los botones de las carpetas que tienen exámenes
-  document.querySelectorAll(".category").forEach(btn => {
-    const cat = btn.dataset.category;
-    if (cat === "Todos" || categoriasActivas.has(cat)) {
-      btn.style.display = "inline-block";
-    } else {
-      btn.style.display = "none";
-    }
-  });
-
-  cards = [...document.querySelectorAll(".card")];
-  filterExams();
+  counter.textContent = res.length + (res.length === 1 ? " actividad" : " actividades");
+  empty.hidden = res.length > 0;
+  empty.textContent = q ? "No encontramos actividades con esa búsqueda." : "Esta materia todavía no tiene actividades.";
+  limpiar.hidden = !search.value;
+  botones.forEach(b => b.setAttribute("aria-pressed", b.dataset.id === materia));
 }
 
-// LÓGICA DE BÚSQUEDA Y FILTROS
-const search = document.getElementById("search");
-const buttons = [...document.querySelectorAll(".category")];
-const counter = document.getElementById("counter");
-const empty = document.getElementById("empty");
-let selected = "Todos";
-let cards = [];
+botones.forEach(b => b.addEventListener("click", () => {
+  materia = b.dataset.id;
+  history.replaceState(null, "", materia === "todos" ? location.pathname + location.search : "#" + materia);
+  render();
+}));
+window.addEventListener("hashchange", () => { materia = leerHash(); render(); });
 
-function filterExams() {
-  const query = search.value.trim().toLowerCase();
-  let visible = 0;
+search.addEventListener("input", () => { ss.set("buscar", search.value); render(); });
+search.addEventListener("keydown", e => { if (e.key === "Escape") limpiar.click(); });
+limpiar.addEventListener("click", () => { search.value = ""; ss.set("buscar", ""); render(); search.focus(); });
+ordenSel.addEventListener("change", () => { orden = ordenSel.value; ls.set("orden", orden); render(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) {
+    e.preventDefault();
+    search.focus();
+  }
+});
 
-  cards.forEach(card => {
-    const text = (card.innerText + " " + card.dataset.search).toLowerCase();
-    const matchesCategory = selected === "Todos" || card.dataset.category === selected;
-    const matchesSearch = text.includes(query);
-    const show = matchesCategory && matchesSearch;
-
-    card.style.display = show ? "" : "none";
-    if (show) visible++;
-  });
-
-  counter.textContent = visible + (visible === 1 ? " examen" : " exámenes");
-  empty.style.display = visible === 0 ? "block" : "none";
+// Tema claro / oscuro
+const html = document.documentElement, btnTema = $("btnTema"), metaTema = document.querySelector("meta[name=theme-color]");
+function pintarTema() {
+  const claro = html.dataset.tema === "claro";
+  btnTema.textContent = claro ? "🌙 Modo oscuro" : "☀ Modo claro";
+  metaTema.content = claro ? "#ffffff" : "#0a0f1e";
 }
-
-buttons.forEach(button => {
-  button.addEventListener("click", () => {
-    selected = button.dataset.category;
-    buttons.forEach(b => b.classList.toggle("active", b === button));
-    filterExams();
-  });
+btnTema.addEventListener("click", () => {
+  html.dataset.tema = html.dataset.tema === "claro" ? "oscuro" : "claro";
+  ls.set("tema", html.dataset.tema);
+  pintarTema();
 });
 
-search.addEventListener("input", filterExams);
-
-// Iniciar
-cargarTarjetas();
-</script>
-
-<script>
-const music = document.getElementById("bg-music");
-music.volume = 0.25;
-document.addEventListener("click", function iniciarMusica() {
-  music.play().catch(() => {});
-  document.removeEventListener("click", iniciarMusica);
+// Música
+const musica = $("bg-music"), btnMusica = $("btnMusica"), vol = $("vol");
+let silencio = ls.get("musicaOff") === "1";
+vol.value = ls.get("musicaVol") ?? 25;
+musica.volume = vol.value / 100;
+function pintarMusica() {
+  btnMusica.textContent = silencio ? "🔇" : "🔊";
+  btnMusica.setAttribute("aria-pressed", silencio);
+  btnMusica.setAttribute("aria-label", silencio ? "Activar música" : "Silenciar música");
+}
+btnMusica.addEventListener("click", () => {
+  silencio = !silencio;
+  ls.set("musicaOff", silencio ? "1" : "0");
+  if (silencio) musica.pause(); else musica.play().catch(() => {});
+  pintarMusica();
 });
-</script>
+vol.addEventListener("input", () => { musica.volume = vol.value / 100; ls.set("musicaVol", vol.value); });
+document.addEventListener("click", function iniciar(e) {
+  if (e.target.closest(".musica")) return;
+  if (!silencio) musica.play().catch(() => {});
+  document.removeEventListener("click", iniciar);
+});
 
+pintarTema();
+pintarMusica();
+render();
+</script>
 </body>
 </html>
