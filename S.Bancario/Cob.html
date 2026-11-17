@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es" data-tema="oscuro"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de circuito</title>
+<style>
+:root{--bg:#070b16;--card:#0e1426;--bord:#1b2440;--bord2:#334155;--txt:#e5e7eb;--txt2:#f1f5f9;--muted:#94a3b8;--fondo2:#0a0f1e;--numbg:#10224a;--numbd:#1d3a7a;--acc:#60a5fa;--opcbd:#1e3a8a;--ok:#4ade80;--bad:#f87171;--line:#94a3b8;--hd:#0e1426}
+[data-tema=claro]{--bg:#f1f5f9;--card:#fff;--bord:#e3e3e3;--bord2:#c4c9ce;--txt:#222;--txt2:#111;--muted:#666;--fondo2:#fff;--numbg:#eef4ff;--numbd:#bcd0f5;--acc:#1d4ed8;--opcbd:#9db7ea;--ok:#15803d;--bad:#b91c1c;--line:#64748b;--hd:#1e293b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.contenedor{max-width:900px;margin:0 auto;padding:28px;display:flex;flex-direction:column;gap:22px}
+.hd{background:var(--hd);color:#fff;border-radius:22px;padding:22px 28px;text-align:center}
+.hd h1{margin:0 0 8px;font-size:26px}.hd p{margin:0;font-size:14px;color:#cbd5e1;line-height:1.5}
+.card{position:relative;background:var(--card);border:1px solid var(--bord);border-radius:22px;padding:50px 24px 24px}
+.tag{position:absolute;top:0;right:0;background:#2563eb;color:#fff;font-size:14px;font-weight:700;padding:9px 16px;border-radius:0 22px 0 14px}
+h2{margin:0 0 14px;font-size:19px;color:var(--txt2)}
+label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px}
+input,textarea{display:block;width:100%;margin-top:5px;font:inherit;font-size:15px;color:var(--txt);background:var(--fondo2);border:1px solid var(--bord2);border-radius:10px;padding:9px 12px}
+textarea{min-height:60px;resize:vertical}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+button{font:inherit;font-size:14px;font-weight:700;color:var(--txt);background:var(--fondo2);border:1px solid var(--bord2);border-radius:10px;padding:9px 14px;cursor:pointer}
+button.on{background:#2563eb;border-color:#2563eb;color:#fff}
+.muted{color:var(--muted);font-size:13px;margin:6px 0 0}
+.boton{font-size:17px;background:#2563eb;color:#fff;border:0;border-radius:14px;padding:14px 26px}.boton:hover{background:#1d4ed8}
+.ft{text-align:center;margin-top:18px}
+.cvbox{overflow-x:auto}
+.cv{position:relative;width:100%;min-width:560px;max-width:760px;aspect-ratio:1;margin:0 auto;background:var(--fondo2);border:1px solid var(--bord);border-radius:14px;user-select:none;touch-action:none}
+.cv.grid{background-image:linear-gradient(var(--bord) 1px,transparent 1px),linear-gradient(90deg,var(--bord) 1px,transparent 1px);background-size:10% 10%}
+#sv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+#sv line{stroke:var(--line);stroke-width:.35}#sv polygon{fill:var(--line)}
+.rc{position:absolute;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--card);border:2px solid var(--bord2);border-radius:8px;font-size:12px;font-weight:700;color:var(--txt2);overflow:hidden;cursor:grab}
+.rc i{color:var(--muted);font-weight:400}.rc.sel{border-color:var(--acc)}
+.rc select{width:100%;height:100%;border:0;background:transparent;color:var(--acc);font:inherit;font-size:12px;font-weight:700;text-align:center;cursor:pointer}
+.rc.ok{border-color:var(--ok)}.rc.ok select{color:var(--ok)}.rc.bad{border-color:var(--bad)}.rc.bad select{color:var(--bad)}
+.rc.col select{color:inherit}.rc.col i{color:inherit;opacity:.6}.rc.ok,.rc.bad{border-width:3px}
+.sw{width:26px;height:26px;padding:0;border-radius:50%}
+#pn label{display:flex;align-items:center;gap:6px;margin:0;color:var(--txt)}#pn label input{width:auto;margin:0}
+#pn input[type=color]{width:42px;height:34px;padding:2px}
+.nm{position:absolute;z-index:3;width:30px;height:30px;margin:-15px;border-radius:50%;border:2px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--acc);cursor:pointer}
+.nm.sel{border-color:var(--acc)}.nm.ok{border-color:var(--ok);color:var(--ok)}.nm.bad{border-color:var(--bad);color:var(--bad)}
+.dt{position:absolute;z-index:5;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:#2563eb;border:2px solid #fff;cursor:pointer}.dt.on{background:#f59e0b;transform:scale(1.4)}
+.pop{position:absolute;z-index:9;width:170px;display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:var(--card);border:1px solid var(--acc);border-radius:12px;box-shadow:0 4px 16px #0006}
+.pop button{min-width:34px;padding:6px 0}
+#pn{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:14px}
+#pn input{width:auto;margin:0;max-width:170px}#pn input[type=number]{width:75px}
+#msg{color:var(--bad);font-size:13px;margin-top:10px}
+#tips{margin-top:14px;padding:14px 16px;border-left:4px solid #2563eb;background:var(--fondo2);border-radius:8px;font-size:14px;white-space:pre-line}
+body:not(.ex) #tips,body.ex #ed,body.ex #pn,body.ex #msg{display:none}
+.rs{margin-top:20px;text-align:center;padding:20px;border:2px solid;border-radius:16px}
+.rs.okr{border-color:var(--ok);color:var(--ok)}.rs.badr{border-color:var(--bad);color:var(--bad)}
+.rs .big{font-size:38px;font-weight:800}.rs p{margin:6px 0 0;color:var(--txt)}
+.tema{position:fixed;bottom:14px;right:14px;z-index:60;font-size:13px;padding:9px 14px;border-radius:20px;background:var(--card);box-shadow:0 2px 10px #0004}
+@media(max-width:700px){.contenedor{padding:12px}.card{padding:50px 12px 18px}}
+</style>
+</head>
+<body>
+<div class="contenedor">
+  <header class="hd"><h1 id="hT">Generador de examen de circuito</h1>
+    <p id="hS">Dibuja el circuito, ponle nombre a los recuadros, ordena las flechas y exporta el examen vacío.</p></header>
+
+  <section class="card" id="ed">
+    <span class="tag">Desarrollador</span>
+    <label>Título del circuito<input id="iT" maxlength="80" placeholder="Ej: Flujo de Comercio Internacional"></label>
+    <label>Partes (separadas por coma o por línea, en MAYÚSCULAS)<textarea id="iP" placeholder="BANCO EMISOR, IMPORTADOR, EXPORTADOR..."></textarea></label>
+    <label>Consejos para el alumno<textarea id="iK"></textarea></label>
+    <div class="bar">
+      <button data-m="sel">✋ Mover / Editar</button>
+      <button data-m="rect">▭ Rectángulo</button>
+      <button data-m="arr">➜ Flecha</button>
+    </div>
+    <p class="muted" id="hint"></p>
+  </section>
+
+  <section class="card">
+    <span class="tag" id="tg">Circuito (grilla 10×10)</span>
+    <div class="cvbox"><div id="cv" class="cv grid"><svg id="sv" viewBox="0 0 100 100"></svg></div></div>
+    <div id="pn"></div><div id="msg"></div><div id="tips"></div>
+    <div class="ft"><button id="bGo" class="boton">Exportar circuito</button></div>
+    <div id="res"></div>
+  </section>
+</div>
+<button id="btnTema" class="tema" type="button"></button>
+
+<script>
+const SRC='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+window.CIRCUITO="eyJ0IjoiQ29icmFuemEgRG9jdW1lbnRhcmlhIGEgUGxhem8iLCJwIjoiRVhQT1JUQURPUiAvIExJQlJBRE9SLElNUE9SVEFET1IgLyBHSVJBRE8sQkFOQ08gUkVNSVRFTlRFLEJBTkNPIENPQlJBRE9SIiwiayI6Ik5vIHNlYXMgY29ybmV0YSIsIlIiOlt7ImlkIjoxLCJjIjowLCJyIjoyLCJ3IjozLCJoIjoxfSx7ImlkIjoyLCJjIjo3LCJyIjoyLCJ3IjozLCJoIjoxfSx7ImlkIjozLCJjIjowLCJyIjo3LCJ3IjozLCJoIjoxfSx7ImlkIjo0LCJjIjo3LCJyIjo3LCJ3IjozLCJoIjoxfV0sIkEiOlt7ImlkIjo2LCJhIjpbMSwiciIsMV0sImIiOlsyLCJsIiwxXSwiZCI6dHJ1ZX0seyJpZCI6NywiYSI6WzIsImIiLDFdLCJiIjpbNCwidCIsMV19LHsiaWQiOjksImEiOls0LCJsIiwxXSwiYiI6WzMsInIiLDFdfSx7ImlkIjoxMCwiYSI6WzMsInQiLDNdLCJiIjpbMSwiYiIsM119LHsiaWQiOjExLCJhIjpbMSwiciIsM10sImIiOlsyLCJsIiwzXX0seyJpZCI6MTIsImEiOlsxLCJiIiwyXSwiYiI6WzMsInQiLDJdfSx7ImlkIjoxMywiYSI6WzMsInIiLDJdLCJiIjpbNCwibCIsMl19LHsiaWQiOjE0LCJhIjpbNCwidCIsMl0sImIiOlsyLCJiIiwyXX0seyJpZCI6MTUsImEiOlsyLCJiIiwzXSwiYiI6WzQsInQiLDNdfSx7ImlkIjoxNiwiYSI6WzQsImIiLDBdLCJiIjpbMywiYiIsNF19LHsiaWQiOjE3LCJhIjpbMywidCIsMV0sImIiOlsxLCJiIiwxXX1dLCJTIjp7IjEiOiJFWFBPUlRBRE9SIC8gTElCUkFET1IiLCIyIjoiSU1QT1JUQURPUiAvIEdJUkFETyIsIjMiOiJCQU5DTyBSRU1JVEVOVEUiLCI0IjoiQkFOQ08gQ09CUkFET1IifSwiTiI6eyI2IjoxLCI3IjoyLCI5IjozLCIxMCI6NCwiMTEiOjUsIjEyIjo2LCIxMyI6NywiMTQiOjgsIjE1Ijo5LCIxNiI6MTAsIjE3IjoxMX19";
+const $=s=>document.querySelector(s),cv=$('#cv'),sv=$('#sv');
+const EX=!!window.CIRCUITO;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const parts=p=>[...new Set(p.split(/[,\n]/).map(x=>x.trim().toUpperCase()).filter(Boolean))];
+let S={t:'',p:'',k:'',R:[],A:[],mode:'sel',sel:null,pend:null,id:1},D=null,ans={r:{},a:{}},chk=null,drag=null,MID={};
+if(EX)D=JSON.parse(decodeURIComponent(escape(atob(window.CIRCUITO))));
+const M=()=>EX?D:S, rc=id=>S.R.find(r=>r.id==id);
+const pt=(r,s,i)=>{const t=i/4,x=r.c*10,y=r.r*10,w=r.w*10,h=r.h*10;
+  return s=='t'?[x+w*t,y]:s=='b'?[x+w*t,y+h]:s=='l'?[x,y+h*t]:[x+w,y+h*t]};
+const ov=q=>S.R.some(o=>o!=q&&q.c<o.c+o.w&&o.c<q.c+q.w&&q.r<o.r+o.h&&o.r<q.r+q.h);
+const ink=h=>{const n=parseInt(h.slice(1),16),l=.299*(n>>16)+.587*(n>>8&255)+.114*(n&255);return l>150?'#111':'#fff'};
+const nota=p=>p<60?2:Math.min(10,Math.ceil((4+(p-60)*.15)*100-1e-6)/100);
+const MSG={2:'Todavía no alcanza. Repasa el circuito y vuelve a intentarlo.',4:'¡Aprobado por poco! Un repaso más y lo dominas.',5:'Aprobaste, pero hay varios puntos por afinar.',6:'Buen trabajo, vas por buen camino.',7:'¡Muy bien! Manejas la mayor parte del circuito.',8:'¡Excelente! Solo fallaron detalles.',9:'¡Casi perfecto! Un pasito más para el 10.',10:'GENIOOOO'};
+
+function draw(){
+  const m=M();let h='',x='';MID={};
+  cv.querySelectorAll('.rc,.nm,.dt,.pop').forEach(e=>e.remove());
+  m.A.forEach(a=>{
+    const p=pt(m.R.find(r=>r.id==a.a[0]),a.a[1],a.a[2]),q=pt(m.R.find(r=>r.id==a.b[0]),a.b[1],a.b[2]);
+    const g=Math.atan2(q[1]-p[1],q[0]-p[0]),cx=Math.cos(g),cy=Math.sin(g),bx=q[0]-2.2*cx,by=q[1]-2.2*cy,k=a.d?2.2:0,ax=p[0]+2.2*cx,ay=p[1]+2.2*cy;
+    h+=`<line x1="${p[0]+k*cx}" y1="${p[1]+k*cy}" x2="${bx}" y2="${by}"/><polygon points="${q[0]},${q[1]} ${bx-cy},${by+cx} ${bx+cy},${by-cx}"/>`;
+    if(a.d)h+=`<polygon points="${p[0]},${p[1]} ${ax-cy},${ay+cx} ${ax+cy},${ay-cx}"/>`;
+    const mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2;MID[a.id]=[mx,my];
+    let c='',v=EX?(ans.a[a.id]||''):a.n;
+    if(EX&&chk&&chk.a[a.id]!==undefined)c=chk.a[a.id]?'ok':'bad';
+    if(!EX&&S.sel&&S.sel.k=='a'&&S.sel.id==a.id)c='sel';
+    x+=`<div class="nm ${c}" data-a="${a.id}" style="left:${mx}%;top:${my}%">${v}</div>`;
+  });
+  const opts=EX?[...new Set(D.p.split(','))].sort():[];
+  m.R.forEach(r=>{
+    let c='',inner;
+    let st=`left:${r.c*10}%;top:${r.r*10}%;width:${r.w*10}%;height:${r.h*10}%`;
+    if(r.col){st+=`;background:${r.col};color:${ink(r.col)}`;c='col'}
+    if(EX){
+      if(chk&&chk.r[r.id]!==undefined)c+=(c?' ':'')+(chk.r[r.id]?'ok':'bad');
+      inner=`<select data-s="${r.id}"><option value="">Entidad...</option>${opts.map(o=>`<option${ans.r[r.id]===o?' selected':''}>${o}</option>`).join('')}</select>`;
+    }else{
+      if(S.sel&&S.sel.k=='r'&&S.sel.id==r.id)c+=(c?' ':'')+'sel';
+      inner=r.name?r.name.replace(/</g,'&lt;'):'<i>Entidad...</i>';
+    }
+    x+=`<div class="rc ${c}" data-r="${r.id}" style="${st}">${inner}</div>`;
+    if(!EX&&S.mode=='arr')['t','b','l','r'].forEach(s=>{for(let i=(s=='l'||s=='r')?1:0;i<=((s=='l'||s=='r')?3:4);i++){
+      const p=pt(r,s,i),on=S.pend&&S.pend[0]==r.id&&S.pend[1]==s&&S.pend[2]==i?'on':'';
+      x+=`<i class="dt ${on}" data-d="${r.id},${s},${i}" style="left:${p[0]}%;top:${p[1]}%"></i>`}});
+  });
+  sv.innerHTML=h;cv.insertAdjacentHTML('beforeend',x);
+  if(!EX)check();
+}
+function check(){
+  const e=[],ns=S.A.map(a=>a.n),N=ns.length;
+  if(!S.R.length)e.push('Agrega al menos un rectángulo.');
+  if(S.R.some(r=>!r.name))e.push('Hay rectángulos sin nombre.');
+  if(!N)e.push('Agrega al menos una flecha.');
+  if(new Set(ns).size<N)e.push('Hay números de paso repetidos.');
+  else if(ns.some(n=>!Number.isInteger(n)||n<1||n>N))e.push(`Los números de paso deben ir de 1 a ${N}, sin saltos.`);
+  $('#msg').innerHTML=e.map(t=>'⚠ '+t).join('<br>');return e;
+}
+function sel(k,id){S.sel=k?{k,id}:null;panel();draw()}
+function panel(){
+  const p=$('#pn'),s=S.sel;if(!s){p.innerHTML='';return}
+  if(s.k=='r'){
+    const r=rc(s.id);
+    p.innerHTML=`<b>Rectángulo:</b><input id="pN" placeholder="NOMBRE" maxlength="30">Ancho<input id="pW" type="number" min="1" max="10" value="${r.w}">Alto<input id="pH" type="number" min="1" max="10" value="${r.h}"><button id="pD">🗑 Borrar</button><br><b>Color:</b><input id="pC" type="color" value="${r.col||'#ffffff'}">${['#fecaca','#fed7aa','#fef08a','#bbf7d0','#bfdbfe','#ddd6fe','#fbcfe8','#e2e8f0'].map(c=>`<button class="sw" data-c="${c}" style="background:${c}"></button>`).join('')}<button id="pX">Sin color</button>`;
+    $('#pC').oninput=e=>{r.col=e.target.value;draw()};
+    p.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{r.col=b.dataset.c;$('#pC').value=r.col;draw()});
+    $('#pX').onclick=()=>{delete r.col;draw()};
+    $('#pN').value=r.name;
+    $('#pN').oninput=e=>{r.name=e.target.value=e.target.value.toUpperCase();draw()};
+    const sz=(k,mx)=>e=>{const o=r[k];r[k]=cl(+e.target.value||1,1,mx-(k=='w'?r.c:r.r));if(ov(r))r[k]=o;e.target.value=r[k];draw()};
+    $('#pW').onchange=sz('w',10);$('#pH').onchange=sz('h',10);
+    $('#pD').onclick=()=>{S.R=S.R.filter(o=>o!=r);S.A=S.A.filter(a=>a.a[0]!=r.id&&a.b[0]!=r.id);sel(null)};
+  }else{
+    const a=S.A.find(o=>o.id==s.id);
+    p.innerHTML=`<b>Flecha:</b>Paso Nº<input id="pN" type="number" min="1" value="${a.n}"><label><input id="pB" type="checkbox"${a.d?' checked':''}>Punta doble ↔</label><button id="pI">⇄ Invertir</button><button id="pD">🗑 Borrar</button>`;
+    $('#pN').onchange=e=>{a.n=+e.target.value;draw()};
+    $('#pB').onchange=e=>{a.d=e.target.checked;draw()};
+    $('#pI').onclick=()=>{[a.a,a.b]=[a.b,a.a];draw()};
+    $('#pD').onclick=()=>{S.A=S.A.filter(o=>o!=a);sel(null)};
+  }
+}
+const nextN=()=>{let n=1;while(S.A.some(a=>a.n==n))n++;return n};
+const HINT={sel:'Arrastra los rectángulos para moverlos. Toca un rectángulo o el círculo de una flecha para editarlo.',rect:'Toca una celda vacía de la grilla para colocar un rectángulo de 2×1.',arr:'Toca un punto azul de un rectángulo y luego un punto de otro: la flecha nace en el primero y la punta toca el segundo. En el panel puedes activar la punta doble ↔.'};
+function setMode(m){S.mode=m;S.pend=null;$('#hint').textContent=HINT[m];document.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m==m));draw()}
+
+if(!EX){
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+  $('#iT').oninput=e=>S.t=e.target.value;
+  $('#iP').oninput=e=>{S.p=e.target.value=e.target.value.toUpperCase()};
+  $('#iK').oninput=e=>S.k=e.target.value;
+  cv.onpointerdown=e=>{
+    const t=e.target.closest('[data-r],[data-d],[data-a]'),b=cv.getBoundingClientRect();
+    const c=Math.floor((e.clientX-b.left)/b.width*10),r=Math.floor((e.clientY-b.top)/b.height*10);
+    if(t&&t.dataset.d){
+      const d=t.dataset.d.split(',');d[0]=+d[0];d[2]=+d[2];
+      if(S.pend&&S.pend[0]!=d[0]){const a={id:S.id++,a:S.pend,b:d,n:nextN()};S.A.push(a);S.pend=null;sel('a',a.id)}
+      else{S.pend=d;draw()}
+      return;
+    }
+    if(t&&t.dataset.a){sel('a',+t.dataset.a);return}
+    if(t&&t.dataset.r){const id=+t.dataset.r,q=rc(id);sel('r',id);if(S.mode=='sel')drag={id,x:c,y:r,c:q.c,r:q.r};return}
+    if(S.mode=='rect'&&c>=0&&c<10&&r>=0&&r<10){
+      const q={id:S.id++,c:Math.min(c,8),r,w:2,h:1,name:''};
+      if(ov(q)){$('#hint').textContent='Ahí ya hay un rectángulo, elige otra celda.';return}
+      S.R.push(q);sel('r',q.id);setTimeout(()=>$('#pN')&&$('#pN').focus(),0);
+    }else if(S.mode=='sel')sel(null);
+  };
+  onpointermove=e=>{
+    if(!drag)return;const q=rc(drag.id),b=cv.getBoundingClientRect();
+    const c=Math.floor((e.clientX-b.left)/b.width*10),r=Math.floor((e.clientY-b.top)/b.height*10);
+    const oc=q.c,or=q.r;q.c=cl(drag.c+c-drag.x,0,10-q.w);q.r=cl(drag.r+r-drag.y,0,10-q.h);
+    if(ov(q)){q.c=oc;q.r=or}draw();
+  };
+  onpointerup=()=>drag=null;
+  $('#bGo').onclick=()=>{
+    const e=check();if(e.length){alert(e.join('\n'));return}
+    const o={t:S.t||'Circuito',p:[...new Set([...parts(S.p),...S.R.map(r=>r.name)])].join(','),k:S.k,
+      R:S.R.map(({id,c,r,w,h,col})=>({id,c,r,w,h,col})),A:S.A.map(({id,a,b,d})=>({id,a,b,d})),
+      S:Object.fromEntries(S.R.map(r=>[r.id,r.name])),N:Object.fromEntries(S.A.map(a=>[a.id,a.n]))};
+    const b64=btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+    const html=SRC.replace('null'+'/*D*/',()=>JSON.stringify(b64));
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+    a.download=(o.t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\W+/g,'-').toLowerCase()||'circuito')+'.html';
+    a.click();
+  };
+  setMode('sel');
+}else{
+  document.body.classList.add('ex');cv.classList.remove('grid');
+  document.title=D.t;$('#hT').textContent=D.t;
+  $('#hS').textContent=`Completa los recuadros con las entidades correspondientes (${D.p.split(',').join(', ')}) y asigna el orden numérico correcto en los círculos de las flechas.`;
+  $('#tg').textContent='Circuito';$('#bGo').textContent='Calificar Diagrama';$('#tips').textContent=D.k;
+  if(!D.k.trim())$('#tips').remove();
+  cv.onchange=e=>{const s=e.target.dataset.s;if(s){ans.r[s]=e.target.value;if(chk)delete chk.r[s];draw()}};
+  cv.onclick=e=>{
+    const n=e.target.closest('.nm'),v=e.target.closest('[data-v]');
+    if(v){const id=v.dataset.id;if(v.dataset.v)ans.a[id]=+v.dataset.v;else delete ans.a[id];if(chk)delete chk.a[id];draw();return}
+    if(n){
+      const id=n.dataset.a,[x,y]=MID[id];draw();
+      let h=D.A.map((_,i)=>`<button data-id="${id}" data-v="${i+1}">${i+1}</button>`).join('')+`<button data-id="${id}" data-v="">✕</button>`;
+      cv.insertAdjacentHTML('beforeend',`<div class="pop" style="left:${cl(x,18,82)}%;top:${y}%;transform:translate(-50%,${y>65?'calc(-100% - 20px)':'20px'})">${h}</div>`);
+    }
+  };
+  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.pop,.nm')){const p=cv.querySelector('.pop');p&&p.remove()}});
+  $('#bGo').onclick=()=>{
+    chk={r:{},a:{}};let ok=0;
+    D.R.forEach(r=>{const g=ans.r[r.id]===D.S[r.id];chk.r[r.id]=g;ok+=g});
+    D.A.forEach(a=>{const g=ans.a[a.id]===D.N[a.id];chk.a[a.id]=g;ok+=g});
+    const tot=D.R.length+D.A.length,p=ok/tot*100,n=nota(p),f=Math.floor(n);
+    draw();
+    $('#res').innerHTML=`<div class="rs ${n>=4?'okr':'badr'}"><div class="big">${n==10?'GENIOOOO':'Nota: '+n.toFixed(2).replace('.',',')}</div>${n==10?'<div class="big">10</div>':`<p><b>${MSG[f]}</b></p>`}<p>Aciertos: ${ok} de ${tot} (${Math.round(p)}%) · ${n>=4?'APROBADO':'DESAPROBADO'}</p></div>`;
+    $('#res').scrollIntoView({behavior:'smooth',block:'center'});
+    if(n==10)confetti();
+  };
+  draw();
+}
+function confetti(){
+  const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99';
+  document.body.appendChild(c);const x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const P=Array.from({length:180},()=>({x:Math.random()*c.width,y:-Math.random()*c.height*.6,vx:Math.random()*4-2,vy:2+Math.random()*4,s:6+Math.random()*8,r:Math.random()*6,vr:Math.random()*.3-.15,c:`hsl(${Math.random()*360},90%,60%)`}));
+  let t=0;(function f(){x.clearRect(0,0,c.width,c.height);
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);x.restore()});
+    if(++t<280)requestAnimationFrame(f);else c.remove()})();
+}
+(function(){
+  var h=document.documentElement,b=document.getElementById('btnTema');
+  function texto(){b.textContent=h.dataset.tema=='claro'?'🌙 Modo oscuro':'☀ Modo claro';}
+  b.onclick=function(){h.dataset.tema=h.dataset.tema=='claro'?'oscuro':'claro';texto();};
+  texto();
+})();
+</script></body></html>
